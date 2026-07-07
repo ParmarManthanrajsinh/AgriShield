@@ -164,6 +164,7 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 async def create_health_report(
     farm_id: int = Form(...),
     description: str = Form(""),
+    language: str = Form("hi"),
     photo: Optional[UploadFile] = File(None),
     audio: Optional[UploadFile] = File(None),
     current_user: models.User = Depends(auth.get_current_user),
@@ -177,7 +178,19 @@ async def create_health_report(
         models.Farm.id == farm_id, models.Farm.user_id == current_user.id
     ).first()
     if not db_farm:
-        raise HTTPException(status_code=404, detail="Farm not found")
+        db_farm = models.Farm(
+            user_id=current_user.id,
+            name="🌾 Demo Green Farm (Paddy/Wheat)",
+            area_hectares=2.5,
+            crop_type="Paddy",
+            location="Punjab",
+            soil_type="Alluvial",
+            irrigation_source="Canal",
+        )
+        db.add(db_farm)
+        db.commit()
+        db.refresh(db_farm)
+        farm_id = db_farm.id
 
     report_id = f"HR-{_uuid.uuid4().hex[:8].upper()}"
     image_path = None
@@ -201,10 +214,26 @@ async def create_health_report(
         with open(audio_path, "wb") as f:
             f.write(content)
 
-    # Run diagnosis
-    diagnosis = None
-    if image_path:
-        diagnosis = classify_image(image_path, farm_id=farm_id)
+    # Run diagnosis (always run using photo OR voice/text description)
+    crop_val = getattr(db_farm, "crop_type", None)
+    if not crop_val:
+        name_lower = (db_farm.name or "").lower()
+        if "wheat" in name_lower:
+            crop_val = "Wheat"
+        elif "cotton" in name_lower:
+            crop_val = "Cotton"
+        elif "sugarcane" in name_lower:
+            crop_val = "Sugarcane"
+        else:
+            crop_val = "Paddy"
+
+    diagnosis = classify_image(
+        image_path=image_path or f"voice_{report_id}.jpg",
+        farm_id=farm_id,
+        crop_type=crop_val,
+        description=description,
+        language=language,
+    )
 
     # Extract symptoms from text description
     symptoms = extract_symptoms_from_text(description) if description else []
@@ -298,7 +327,22 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
 
 @app.get("/farms", response_model=list[schemas.FarmResponse])
 def get_farms(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
-    return db.query(models.Farm).filter(models.Farm.user_id == current_user.id).all()
+    farms = db.query(models.Farm).filter(models.Farm.user_id == current_user.id).all()
+    if not farms:
+        default_farm = models.Farm(
+            user_id=current_user.id,
+            name="🌾 Demo Green Farm (Paddy/Wheat)",
+            area_hectares=2.5,
+            crop_type="Paddy",
+            location="Punjab",
+            soil_type="Alluvial",
+            irrigation_source="Canal",
+        )
+        db.add(default_farm)
+        db.commit()
+        db.refresh(default_farm)
+        farms = [default_farm]
+    return farms
 
 @app.post("/farms", response_model=schemas.FarmResponse)
 def create_farm(farm: schemas.FarmCreate, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
@@ -510,22 +554,55 @@ def mint_farm_nft(id: int, db: Session = Depends(get_db), current_user: models.U
 
 # ========== Phase 3D: WhatsApp Business Webhook & Message Log ==========
 
-from sms_service import handle_whatsapp_inbound, get_whatsapp_conversations, get_message_log
+from pydantic import BaseModel
+from fastapi import Response
+import xml.sax.saxutils as saxutils
+from sms_service import get_message_log
+from whatsapp_ai_service import handle_whatsapp_inbound, get_whatsapp_conversations, set_user_language
+
+class WhatsAppSimulateRequest(BaseModel):
+    phone: str = "+919876543210"
+    message: str = ""
+    media_url: Optional[str] = None
+    language: Optional[str] = None
 
 @app.post("/webhooks/whatsapp-inbound")
 def whatsapp_inbound_webhook(
     From: str = Form("whatsapp:+919876543210"),
     Body: str = Form("help"),
     NumMedia: int = Form(0),
+    MediaUrl0: Optional[str] = Form(None),
+    MediaContentType0: Optional[str] = Form(None),
 ):
     """
-    Simulate WhatsApp Business inbound webhook.
-    In production, Twilio WhatsApp Business API posts here.
+    Twilio WhatsApp Business inbound webhook.
+    Returns valid TwiML XML for live WhatsApp message delivery.
     """
-    # Strip 'whatsapp:' prefix if present
     phone = From.replace("whatsapp:", "")
-    result = handle_whatsapp_inbound(from_number=phone, body=Body, num_media=NumMedia)
-    return result
+    result = handle_whatsapp_inbound(
+        from_number=phone,
+        body=Body,
+        num_media=NumMedia,
+        media_url=MediaUrl0,
+        media_content_type=MediaContentType0
+    )
+    ai_reply = result.get("ai_reply", "Namaste! AgriShield AI is ready to help.")
+    escaped_reply = saxutils.escape(ai_reply)
+    twiml_xml = f'<?xml version="1.0" encoding="UTF-8"?><Response><Message>{escaped_reply}</Message></Response>'
+    return Response(content=twiml_xml, media_type="application/xml")
+
+
+@app.post("/api/whatsapp/simulate")
+def simulate_whatsapp_message(req: WhatsAppSimulateRequest):
+    """Interactive sandbox endpoint for testing photo upload diagnosis & Q&A from web UI."""
+    if req.language:
+        set_user_language(req.phone, req.language)
+    return handle_whatsapp_inbound(
+        from_number=req.phone,
+        body=req.message,
+        num_media=1 if req.media_url else 0,
+        media_url=req.media_url
+    )
 
 
 @app.get("/api/whatsapp/conversations")
@@ -537,5 +614,12 @@ def get_wa_conversations():
 @app.get("/api/messages/log")
 def get_all_messages():
     """Get full message log (SMS + WhatsApp, inbound + outbound)."""
-    return get_message_log()
+    # Combine SMS logs with rich WhatsApp conversations
+    sms_logs = get_message_log()
+    wa_logs = get_whatsapp_conversations()
+    # Merge and sort by timestamp
+    combined = sms_logs + [w for w in wa_logs if w not in sms_logs]
+    combined.sort(key=lambda x: x.get("timestamp", ""), reverse=True)
+    return combined
+
 

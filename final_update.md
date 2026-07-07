@@ -61,3 +61,28 @@ Upgrade: Fetch exact 250m-resolution soil properties (clay/sand/silt/pH/organic 
 Upgrade: Pull live APMC/e-NAM market prices. If two crops both score >90%, rank higher the one with better market market price and profit margin.
 
 
+
+## Report Crop Issue & Indic Voice Log
+
+1. What For? (The Problem & Solution)
+Rural farmers cannot type complex English. When crops get sick (yellow leaves, bugs, rot), farmer needs fast doctor diagnosis without typing.
+
+This tool lets farmer:
+
+Take photo of sick plant.
+Speak voice note in native Indian language (Hindi, Telugu, Tamil, Marathi).
+2. What Functionality? (How It Works)
+A. 🎙️ Indic Voice Log & Bhashini AI STT (Speech-to-Text)
+Farmer presses record and speaks native language (e.g., Hindi: "पत्ते पीले पड़ रहे हैं...").
+Bhashini AI translates spoken Indian audio into diagnostic English text ("Leaves turning yellow with brown lesions...").
+B. 🔬 AI Disease Diagnosis (Vision + NLP)
+Backend (/api/health-report) receives photo and voice text.
+AI Vision Engine scans leaf photo for disease patterns (Blast, Rust, Blight).
+NLP Engine extracts symptoms from translated voice text.
+Returns: Disease name, match confidence %, and practical remedy ("Spray Copper Oxychloride 2g/L").
+C. 🆘 Automatic RSK Expert Escalation
+If AI is unsure (low confidence) or disease is severe/deadly:
+System auto-creates emergency ticket in RSK Expert Queue (/admin/rsk-queue).
+Human agricultural scientist (RSK Kendra) listens to farmer's voice log, views photo, and sends verified cure.
+Summary
+Photo + Local Voice ➔ Bhashini AI Translation ➔ Instant AI Remedy or Human Scientist Help.
