@@ -49,3 +49,13 @@ After implementing these changes:
 
 
 ## crop recomendation 
+
+is crop recomendation really analyse the real farm and give the suggesion accordingly or is this just give the some randome things or mock data or sommthing 
+how much is it accurate and what are the things is it using 
+
+1. Hyper-Local Soil API (SoilGrids):
+Current: State-level CSV lookup for soil & pH.
+Upgrade: Fetch exact 250m-resolution soil properties (clay/sand/silt/pH/organic carbon) from free ISRIC SoilGrids API using farm polygon coordinates.
+
+2. Mandi Market Price / ROI Optimization:
+Upgrade: Pull live APMC/e-NAM market prices. If two crops both score >90%, rank higher the one with better market market price and profit margin.

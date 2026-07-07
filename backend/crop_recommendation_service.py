@@ -229,6 +229,44 @@ def score_crop(
     }
 
 
+def fetch_hyperlocal_soil(lat: float, lng: float) -> tuple[Optional[str], Optional[float]]:
+    """
+    Fetch 250m-resolution hyper-local soil type and pH from ISRIC SoilGrids REST API.
+    Returns (soil_type, ph) or (None, None) if API fails/times out.
+    """
+    try:
+        import urllib.request
+        url = f"https://rest.isric.org/soilgrids/v2.0/properties/query?lon={lng}&lat={lat}&property=clay&property=sand&property=silt&property=phh2o&depth=0-5cm"
+        req = urllib.request.Request(url, headers={"User-Agent": "AgriShield-AI/1.0"})
+        with urllib.request.urlopen(req, timeout=3.0) as resp:
+            data = json.loads(resp.read().decode("utf-8"))
+            layers = data.get("properties", {}).get("layers", [])
+            clay, sand, silt, ph = None, None, None, None
+            for layer in layers:
+                name = layer.get("name")
+                depths = layer.get("depths", [])
+                if not depths: continue
+                val = depths[0].get("values", {}).get("mean")
+                if val is None: continue
+                if name == "clay": clay = val
+                elif name == "sand": sand = val
+                elif name == "silt": silt = val
+                elif name == "phh2o": ph = round(val / 10.0, 1)  # SoilGrids pH is scaled by 10
+            
+            soil_type = None
+            if clay is not None and sand is not None and silt is not None:
+                if clay > sand and clay > silt or clay > 350:
+                    soil_type = "Black" if clay > 450 else "Clay"
+                elif sand > 600:
+                    soil_type = "Red" if sand > 700 else "Sandy"
+                else:
+                    soil_type = "Alluvial"
+            
+            return soil_type, ph
+    except Exception:
+        return None, None
+
+
 def get_recommendations(
     lat: float,
     lng: float,
@@ -247,6 +285,14 @@ def get_recommendations(
 
     state = _find_nearest_state(lat, lng)
 
+    # 1. Try Hyper-Local ISRIC SoilGrids API first
+    hyper_soil, hyper_ph = fetch_hyperlocal_soil(lat, lng)
+    if hyper_soil and not soil_type:
+        soil_type = hyper_soil
+    if hyper_ph is not None and ph is None:
+        ph = hyper_ph
+
+    # 2. Fallback to state-level CSV lookup if API timed out or no data
     if not soil_type and state:
         for row in soil_data:
             if row["state"].strip() == state:
@@ -304,5 +350,6 @@ def get_recommendations(
         "current_temp_c": current_temp,
         "groundwater_depth_m_used": groundwater_depth_m,
         "month": MONTH_ABBR[month_idx],
+        "hyperlocal_api_used": hyper_soil is not None or hyper_ph is not None,
         "recommendations": scored[:top_n],
     }

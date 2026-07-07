@@ -53,6 +53,7 @@ interface RecommendationResponse {
   current_temp_c: number | null;
   groundwater_depth_m_used?: number | null;
   month: string;
+  hyperlocal_api_used?: boolean;
   recommendations: CropRecommendation[];
 }
 
@@ -411,6 +412,11 @@ export default function RecommendedCropsPage() {
                   {result.soil_type_used && (
                     <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-amber-50 text-amber-800 font-semibold border border-amber-100">
                       🪨 {result.soil_type_used}
+                    </span>
+                  )}
+                  {result.hyperlocal_api_used && (
+                    <span className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 font-bold border border-emerald-200">
+                      🛰️ ISRIC SoilGrids 250m Hyper-Local API Active
                     </span>
                   )}
                   {result.ph_used !== null && (
