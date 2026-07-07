@@ -22,15 +22,19 @@ Currently, the project has implemented Phase 1 through Phase 8 along with Phase 
 ## How to Run
 
 ### Backend
+**Note:** This project requires Python 3.13 due to dependency compatibility.
+
 1. `cd backend`
-2. `python -m venv venv`
+2. `python3.13 -m venv venv` (or specify full path to your Python 3.13 executable)
 3. Activate your virtual environment:
-   - If venv is inside backend folder: `.\venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
-   - If venv is in root workspace folder: `..\venv\Scripts\activate` (Windows)
+   - Windows: `.\venv\Scripts\activate`
+   - Mac/Linux: `source venv/bin/activate`
 4. Install dependencies:
+   `pip install --upgrade pip`
+   `pip install "pandas<3.0.0"`
    `pip install -r requirements.txt`
-5. Start the server:
-  `python -m uvicorn main:app --reload --port 8000` or `py -m uvicorn main:app --reload --port 8000` 
+5. Start the server (ensure you use Python 3.13):
+  `python -m uvicorn main:app --reload --host localhost --port 8000`
 
 ### Frontend
 1. `cd frontend`

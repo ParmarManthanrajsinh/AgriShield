@@ -21,3 +21,17 @@ build/
 .next/
 out/
 *.log
+
+# DB
+*.db
+*.sqlite3
+
+# Binaries
+*.exe
+
+# Generated data
+backend/nfts/*
+!backend/nfts/.gitkeep
+backend/media_storage/*
+!backend/media_storage/.gitkeep
+
