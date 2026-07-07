@@ -59,3 +59,5 @@ Upgrade: Fetch exact 250m-resolution soil properties (clay/sand/silt/pH/organic 
 
 2. Mandi Market Price / ROI Optimization:
 Upgrade: Pull live APMC/e-NAM market prices. If two crops both score >90%, rank higher the one with better market market price and profit margin.
+
+

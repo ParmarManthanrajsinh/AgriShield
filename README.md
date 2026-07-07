@@ -24,12 +24,12 @@ Currently, the project has implemented Phase 1 through Phase 8 along with Phase 
 ### Backend
 1. `cd backend`
 2. `python -m venv venv`
-3. `.\venv\Scripts\activate` (Windows) or `source venv/bin/activate` (Mac/Linux)
+3. `.\venv\Scripts\activate` (Windows — use `..\venv\Scripts\activate` if venv is in root folder) or `source venv/bin/activate` (Mac/Linux)
 4. `pip install -r requirements.txt`
 if you get email error{
 pip install 'pydantic[email]'
 }
-5. 'uvicorn main:app --port 8000'
+5. `python -m uvicorn main:app --reload --port 8000` (or `py -m uvicorn main:app --reload --port 8000` on Windows)
 
 ### Frontend
 1. `cd frontend`
