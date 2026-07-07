@@ -19,36 +19,29 @@ export default function DashboardPage() {
   const [farms, setFarms] = useState<Farm[]>([]);
 
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push("/login");
-      return;
-    }
-
+    let cancelled = false;
     fetch("http://localhost:8000/users/me", {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: "include"
     })
     .then(res => {
       if (!res.ok) throw new Error("Unauthorized");
       return res.json();
     })
-    .then(data => setUser(data))
-    .catch(() => {
-      localStorage.removeItem("token");
-      router.push("/login");
-    });
+    .then(data => { if (!cancelled) setUser(data) })
+    .catch(() => { if (!cancelled) router.push("/login") });
 
     fetch("http://localhost:8000/farms", {
-      headers: { Authorization: `Bearer ${token}` }
+      credentials: "include"
     })
-    .then(res => res.json())
-    .then(data => setFarms(data))
-    .catch(err => console.error("Failed to fetch farms", err));
+    .then(res => { if (!res.ok) return []; return res.json() })
+    .then(data => { if (!cancelled) setFarms(data) })
+    .catch(() => {});
+    return () => { cancelled = true };
   }, [router]);
 
   const handleLogout = () => {
-    localStorage.removeItem("token");
-    router.push("/login");
+    fetch("http://localhost:8000/auth/logout", { method: "POST", credentials: "include" })
+      .finally(() => router.push("/login"));
   };
 
   if (!user) return <div className="p-8 text-center">Loading...</div>;
