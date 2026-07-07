@@ -39,11 +39,11 @@ const createHandleIcon = (index: number) =>
 
 export default function FarmMap({ onPolygonChange, initialPolygon = [], readOnly = false, heightClassName = "h-[450px]" }: FarmMapProps) {
   const [points, setPoints] = useState<[number, number][]>(initialPolygon);
-  
+
   // Default center: India [20.5937, 78.9629], default zoom: 5
   const defaultCenter: [number, number] = initialPolygon.length > 0 ? initialPolygon[0] : [20.5937, 78.9629];
   const defaultZoom = initialPolygon.length > 0 ? 13 : 5;
-  
+
   const [mapCenter, setMapCenter] = useState<[number, number]>(defaultCenter);
   const [mapZoom, setMapZoom] = useState<number>(defaultZoom);
   const [searchQuery, setSearchQuery] = useState("");
@@ -127,7 +127,7 @@ export default function FarmMap({ onPolygonChange, initialPolygon = [], readOnly
         </div>
       )}
       {searchError && <p className="text-red-500 text-xs">{searchError}</p>}
-      
+
       <div className={`relative w-full ${heightClassName} min-h-[450px] rounded-md overflow-hidden border shadow-inner`}>
         {!readOnly && (
           <div className="absolute top-2 right-2 z-[1000] bg-white/95 backdrop-blur p-3 rounded-lg shadow-md border border-gray-200 max-w-xs">
