@@ -28,6 +28,11 @@ export default function FarmDetailPage() {
   };
 
   const [mintingNFT, setMintingNFT] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState("");
+  const [editArea, setEditArea] = useState("");
+  const [editPoints, setEditPoints] = useState<[number, number][]>([]);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -43,10 +48,70 @@ export default function FarmDetailPage() {
     .then(data => {
       data.points = JSON.parse(data.boundary_geojson);
       setFarm(data);
+      setEditName(data.name);
+      setEditArea(data.area_hectares);
+      setEditPoints(data.points || []);
       fetchMetrics(token);
     })
     .catch(() => router.push("/dashboard"));
   }, [params.id, router]);
+
+  const handleSaveEdit = async () => {
+    if (editPoints.length < 4) {
+      alert("Please draw a 4-sided polygon on the map.");
+      return;
+    }
+    setSavingEdit(true);
+    const token = localStorage.getItem("token");
+    try {
+      const payload = {
+        name: editName,
+        area_hectares: editArea,
+        boundary_geojson: JSON.stringify(editPoints),
+        lat: editPoints[0][0].toString(),
+        lng: editPoints[0][1].toString()
+      };
+      const res = await fetch(`http://localhost:8000/farms/${params.id}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`
+        },
+        body: JSON.stringify(payload)
+      });
+      if (res.ok) {
+        const updated = await res.json();
+        updated.points = JSON.parse(updated.boundary_geojson);
+        setFarm(updated);
+        setIsEditing(false);
+      } else {
+        alert("Failed to update farm");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+    setSavingEdit(false);
+  };
+
+  const handleDeleteFarm = async () => {
+    if (!window.confirm("⚠️ Are you sure you want to permanently delete this farm and all associated records?")) {
+      return;
+    }
+    const token = localStorage.getItem("token");
+    try {
+      const res = await fetch(`http://localhost:8000/farms/${params.id}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      if (res.ok) {
+        router.push("/dashboard");
+      } else {
+        alert("Failed to delete farm");
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  };
 
   const handleRefresh = async () => {
     const token = localStorage.getItem("token");
@@ -132,9 +197,68 @@ export default function FarmDetailPage() {
             <Button variant="outline" className="rounded-full" onClick={() => router.push("/dashboard")}>&larr; Dashboard</Button>
             <Button variant="outline" className="rounded-full" onClick={() => router.push("/claims")}>My Claims</Button>
         </div>
-        <div className="flex justify-between items-center py-4">
-          <h1 className="apple-title">{farm.name}</h1>
-          <div className="flex gap-3">
+        {isEditing && (
+          <div className="fixed inset-0 z-[5000] bg-black/75 backdrop-blur-sm flex items-center justify-center p-4 md:p-8 animate-in fade-in duration-300">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-6xl h-[90vh] flex flex-col overflow-hidden border border-gray-200">
+              <div className="p-6 bg-gray-50 border-b border-gray-200 flex justify-between items-center flex-wrap gap-4">
+                <div className="flex items-center gap-4 flex-wrap">
+                  <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                    <span>✏️ Fullscreen Map Edit:</span>
+                  </h2>
+                  <input
+                    type="text"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    className="px-3 py-1.5 border rounded-lg bg-white text-gray-900 font-medium text-sm w-60 shadow-sm focus:ring-2 focus:ring-green-500"
+                    placeholder="Farm Name"
+                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="number"
+                      step="0.01"
+                      value={editArea}
+                      onChange={(e) => setEditArea(e.target.value)}
+                      className="px-3 py-1.5 border rounded-lg bg-white text-gray-900 font-medium text-sm w-28 shadow-sm focus:ring-2 focus:ring-green-500"
+                      placeholder="Area"
+                    />
+                    <span className="text-sm font-medium text-gray-600">hectares</span>
+                  </div>
+                </div>
+                <div className="flex gap-3">
+                  <Button className="rounded-full bg-green-600 hover:bg-green-700 text-white shadow-md px-6" onClick={handleSaveEdit} disabled={savingEdit}>
+                    {savingEdit ? "Saving..." : "Save Changes"}
+                  </Button>
+                  <Button className="rounded-full" variant="outline" onClick={() => setIsEditing(false)}>
+                    Cancel
+                  </Button>
+                </div>
+              </div>
+
+              <div className="flex-1 p-6 overflow-hidden flex flex-col bg-gray-50/50">
+                <div className="flex-1 w-full h-full">
+                  <FarmMap
+                    initialPolygon={editPoints}
+                    onPolygonChange={setEditPoints}
+                    readOnly={false}
+                    heightClassName="h-full min-h-[500px]"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex justify-between items-center py-4 flex-wrap gap-4">
+          <div>
+            <h1 className="apple-title">{farm.name}</h1>
+          </div>
+          <div className="flex gap-3 flex-wrap">
+            <Button className="rounded-full bg-blue-50 text-blue-700 hover:bg-blue-100 border border-blue-200" onClick={() => setIsEditing(true)}>
+              ✏️ Edit Farm
+            </Button>
+            <Button className="rounded-full bg-red-50 text-red-700 hover:bg-red-100 border border-red-200" onClick={handleDeleteFarm}>
+              🗑️ Delete Farm
+            </Button>
             <Button className="rounded-full bg-gray-200 text-gray-900 hover:bg-gray-300" onClick={handleRefresh} disabled={refreshing}>
               {refreshing ? "Refreshing..." : "Refresh Metrics"}
             </Button>
@@ -154,8 +278,17 @@ export default function FarmDetailPage() {
                 <p className="text-gray-500">Area</p>
                 <p className="font-medium">{farm.area_hectares} hectares</p>
               </div>
-              <div className="h-[200px] w-full rounded border overflow-hidden">
-                <FarmMap initialPolygon={farm.points} readOnly />
+              <div
+                className="h-[250px] w-full rounded border overflow-hidden relative group cursor-pointer"
+                onClick={() => setIsEditing(true)}
+                title="Click to open Fullscreen Edit Map"
+              >
+                <FarmMap initialPolygon={farm.points} readOnly heightClassName="h-full" />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition duration-300 z-[1000] flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 bg-white text-gray-900 px-4 py-2 rounded-full font-semibold text-xs shadow-lg transition duration-300 flex items-center gap-1">
+                    ✏️ Click for Fullscreen Map Edit
+                  </span>
+                </div>
               </div>
             </CardContent>
           </Card>

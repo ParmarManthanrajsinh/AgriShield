@@ -1,1 +1,1 @@
-# Services package
+from .core import *

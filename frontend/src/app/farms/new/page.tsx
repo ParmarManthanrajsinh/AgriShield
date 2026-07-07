@@ -20,8 +20,8 @@ export default function NewFarmPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (points.length < 3) {
-      setError("Please draw a polygon with at least 3 points");
+    if (points.length < 4) {
+      setError("Please draw a polygon with 4 dots (4 corners)");
       return;
     }
     
@@ -61,7 +61,7 @@ export default function NewFarmPage() {
         <Card>
           <CardHeader>
             <CardTitle>Add New Farm</CardTitle>
-            <CardDescription>Enter details and draw the boundary on the map.</CardDescription>
+            <CardDescription>Enter details, click map to place 4 corner dots, and drag dots to adjust side lengths smoothly.</CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
