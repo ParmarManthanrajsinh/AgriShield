@@ -26,7 +26,20 @@ async function handler(
       requestInit.body = await request.arrayBuffer();
     }
 
-    return await fetch(targetUrl, requestInit);
+    const backendResponse = await fetch(targetUrl, requestInit);
+    
+    // Node.js fetch automatically decompresses responses, but leaves the original headers.
+    // If we forward 'content-encoding: gzip' to the browser with the already-decompressed body,
+    // the browser throws ERR_CONTENT_DECODING_FAILED.
+    const responseHeaders = new Headers(backendResponse.headers);
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("content-length");
+    
+    return new Response(backendResponse.body, {
+      status: backendResponse.status,
+      statusText: backendResponse.statusText,
+      headers: responseHeaders,
+    });
   } catch (reason) {
     const message =
       reason instanceof Error ? reason.message : "Unexpected error";

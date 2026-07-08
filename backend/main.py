@@ -353,20 +353,6 @@ def read_users_me(current_user: models.User = Depends(auth.get_current_user)):
 @app.get("/farms", response_model=list[schemas.FarmResponse])
 def get_farms(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
     farms = db.query(models.Farm).filter(models.Farm.user_id == current_user.id).all()
-    if not farms:
-        default_farm = models.Farm(
-            user_id=current_user.id,
-            name="🌾 Demo Green Farm (Paddy/Wheat)",
-            area_hectares=2.5,
-            crop_type="Paddy",
-            location="Punjab",
-            soil_type="Alluvial",
-            irrigation_source="Canal",
-        )
-        db.add(default_farm)
-        db.commit()
-        db.refresh(default_farm)
-        farms = [default_farm]
     return farms
 
 @app.post("/farms", response_model=schemas.FarmResponse)

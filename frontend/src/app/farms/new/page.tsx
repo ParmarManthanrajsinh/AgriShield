@@ -42,7 +42,10 @@ export default function NewFarmPage() {
         body: JSON.stringify(payload)
       });
 
-      if (!res.ok) throw new Error("Failed to create farm");
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(getErrorMessage(errData, "Failed to create farm"));
+      }
 
       router.push("/dashboard");
     } catch (err: any) {
