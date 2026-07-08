@@ -12,8 +12,21 @@ async function handler(
   const targetUrl = new URL(pathname + search, BACKEND_URL);
 
   try {
-    const proxyRequest = new Request(targetUrl, request);
-    return fetch(proxyRequest);
+    const headers = new Headers(request.headers);
+    headers.delete("host"); // Let fetch set the correct host for the backend
+    headers.delete("referer");
+
+    const requestInit: RequestInit = {
+      method: request.method,
+      headers,
+      redirect: "manual",
+    };
+
+    if (request.method !== "GET" && request.method !== "HEAD") {
+      requestInit.body = await request.arrayBuffer();
+    }
+
+    return await fetch(targetUrl, requestInit);
   } catch (reason) {
     const message =
       reason instanceof Error ? reason.message : "Unexpected error";
