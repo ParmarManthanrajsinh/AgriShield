@@ -35,12 +35,14 @@ export function getToken(): string | null {
 export function setToken(token: string) {
   if (typeof window !== "undefined") {
     localStorage.setItem(TOKEN_KEY, token);
+    document.cookie = `token=${token}; path=/; max-age=${60 * 60 * 24 * 7}; samesite=lax`;
   }
 }
 
 export function removeToken() {
   if (typeof window !== "undefined") {
     localStorage.removeItem(TOKEN_KEY);
+    document.cookie = "token=; path=/; max-age=0";
   }
 }
 
