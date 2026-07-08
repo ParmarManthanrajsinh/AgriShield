@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE, authFetch, removeToken } from "@/lib/api";
+import { getApiBase, authFetch, removeToken } from "@/lib/api";
 import {
   LogOut,
   Sprout,
@@ -46,35 +46,40 @@ export default function DashboardPage() {
 
   useEffect(() => {
     let cancelled = false;
-    authFetch(`${API_BASE}/users/me`)
-    .then(res => {
-      if (!res.ok) throw new Error("Unauthorized");
-      return res.json();
-    })
-    .then(data => {
-      if (!cancelled) {
-        if (data.role === "rsk_expert") {
-          router.push("/admin/rsk-queue");
-          return;
+    (async () => {
+      const apiBase = await getApiBase();
+      if (cancelled) return;
+      authFetch(`${apiBase}/users/me`)
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(data => {
+        if (!cancelled) {
+          if (data.role === "rsk_expert") {
+            router.push("/admin/rsk-queue");
+            return;
+          }
+          if (data.role === "insurance_admin") {
+            router.push("/admin/claims");
+            return;
+          }
+          setUser(data);
         }
-        if (data.role === "insurance_admin") {
-          router.push("/admin/claims");
-          return;
-        }
-        setUser(data);
-      }
-    })
-    .catch(() => { if (!cancelled) router.push("/login") });
+      })
+      .catch(() => { if (!cancelled) router.push("/login") });
 
-    authFetch(`${API_BASE}/farms`)
-    .then(res => { if (!res.ok) return []; return res.json() })
-    .then(data => { if (!cancelled) setFarms(data) })
-    .catch(() => {});
+      authFetch(`${apiBase}/farms`)
+      .then(res => { if (!res.ok) return []; return res.json() })
+      .then(data => { if (!cancelled) setFarms(data) })
+      .catch(() => {});
+    })();
     return () => { cancelled = true };
   }, [router]);
 
-  const handleLogout = () => {
-    authFetch(`${API_BASE}/auth/logout`, { method: "POST" })
+  const handleLogout = async () => {
+    const apiBase = await getApiBase();
+    authFetch(`${apiBase}/auth/logout`, { method: "POST" })
       .finally(() => { removeToken(); router.push("/login"); });
   };
 

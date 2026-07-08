@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
-import { API_BASE , authFetch} from "@/lib/api";
+import { getApiBase , authFetch} from "@/lib/api";
 
 interface Claim {
   id: number;
@@ -20,13 +20,16 @@ export default function ClaimsPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
 
   useEffect(() => {
-    authFetch(`${API_BASE}/claims`)
-    .then(res => {
-      if (!res.ok) throw new Error("Unauthorized");
-      return res.json();
-    })
-    .then(data => setClaims(data))
-    .catch(err => console.error(err));
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/claims`)
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(data => setClaims(data))
+      .catch(err => console.error(err));
+    })();
   }, [router]);
 
   return (

@@ -5,6 +5,25 @@ function getDefaultApiBase(): string {
 // API_BASE: inlined at build time from NEXT_PUBLIC_API_URL env var
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || getDefaultApiBase();
 
+let _apiBasePromise: Promise<string> | null = null;
+
+export async function getApiBase(): Promise<string> {
+  if (_apiBasePromise) return _apiBasePromise;
+
+  _apiBasePromise = (async () => {
+    try {
+      const res = await fetch("/api/config");
+      const data = await res.json();
+      if (data.API_BASE) return data.API_BASE;
+    } catch {
+      // fall through to default
+    }
+    return getDefaultApiBase();
+  })();
+
+  return _apiBasePromise;
+}
+
 // --- Token helpers (localStorage-based, works cross-origin) ---
 const TOKEN_KEY = "agrishield_token";
 

@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { API_BASE , authFetch} from "@/lib/api";
+import { getApiBase , authFetch} from "@/lib/api";
 
 export default function AdminClaimReviewPage() {
   const params = useParams();
@@ -14,27 +14,31 @@ export default function AdminClaimReviewPage() {
   const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
   useEffect(() => {
-    authFetch(`${API_BASE}/users/me`)
-      .then(res => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
-      })
-      .then(userData => {
-        if (userData.role !== "insurance_admin") {
-          router.push("/dashboard");
-          return;
-        }
-        return authFetch(`${API_BASE}/admin/claims/${params.id}`)
-          .then(res => { if (!res.ok) throw new Error("Error"); return res.json(); })
-          .then(data => setClaim(data));
-      })
-      .catch(() => router.push("/dashboard"));
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/users/me`)
+        .then(res => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then(userData => {
+          if (userData.role !== "insurance_admin") {
+            router.push("/dashboard");
+            return;
+          }
+          return authFetch(`${apiBase}/admin/claims/${params.id}`)
+            .then(res => { if (!res.ok) throw new Error("Error"); return res.json(); })
+            .then(data => setClaim(data));
+        })
+        .catch(() => router.push("/dashboard"));
+    })();
   }, [params.id, router]);
 
   const handleVerify = async () => {
     setVerifying(true);
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/admin/claims/${params.id}/verify`, {
+      const res = await authFetch(`${apiBase}/admin/claims/${params.id}/verify`, {
         method: "POST"
       });
       const data = await res.json();
@@ -47,8 +51,9 @@ export default function AdminClaimReviewPage() {
   };
 
   const handleDecision = async (decision: 'approve' | 'reject') => {
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/admin/claims/${params.id}/${decision}`, {
+      const res = await authFetch(`${apiBase}/admin/claims/${params.id}/${decision}`, {
         method: "POST"
       });
       if (res.ok) {

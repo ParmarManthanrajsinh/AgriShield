@@ -11,7 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { API_BASE , authFetch} from "@/lib/api";
+import { getApiBase , authFetch} from "@/lib/api";
 import {
   ArrowLeft,
   MessageSquare,
@@ -100,6 +100,7 @@ export default function WhatsAppIVRPage() {
   const [activeLang, setActiveLang] = useState("hi");
   const [simPhone, setSimPhone] = useState("+919876543210");
   const [isServerOnline, setIsServerOnline] = useState(true);
+  const [resolvedBase, setResolvedBase] = useState("");
   const chatEndRef = useRef<HTMLDivElement>(null);
   const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
 
@@ -115,16 +116,24 @@ export default function WhatsAppIVRPage() {
   }, []);
 
   useEffect(() => {
+    getApiBase().then(setResolvedBase);
+  }, []);
+
+  useEffect(() => {
     let cancelled = false;
-    authFetch(`${API_BASE}/users/me`)
-    .then(res => {
-      if (!res.ok) throw new Error("Unauthorized");
-    })
-    .catch(() => {
-      if (!cancelled) {
-        router.push("/login?redirect=/dashboard/whatsapp-ivr");
-      }
-    });
+    (async () => {
+      const apiBase = await getApiBase();
+      if (cancelled) return;
+      authFetch(`${apiBase}/users/me`)
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+      })
+      .catch(() => {
+        if (!cancelled) {
+          router.push("/login?redirect=/dashboard/whatsapp-ivr");
+        }
+      });
+    })();
 
     // Load initial welcome message
     setMessages([
@@ -166,7 +175,8 @@ export default function WhatsAppIVRPage() {
     setMessages((prev) => [...prev, userMsg]);
 
     try {
-      const res = await authFetch(`${API_BASE}/api/whatsapp/simulate`, {
+      const apiBase = await getApiBase();
+      const res = await authFetch(`${apiBase}/api/whatsapp/simulate`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -610,7 +620,7 @@ export default function WhatsAppIVRPage() {
                 <div className="space-y-1.5 bg-[#f3f3f6] p-3.5 rounded-xl border border-[#c0c9c0]/50 font-mono">
                   <p className="text-[#707972] text-[11px] uppercase font-bold tracking-wider">1. Webhook Endpoint URL:</p>
                   <div className="bg-white p-2 rounded-lg border border-[#c0c9c0] text-[#0f4d32] break-all select-all font-bold">
-                    {API_BASE}/webhooks/whatsapp-inbound
+                    {resolvedBase}/webhooks/whatsapp-inbound
                   </div>
                 </div>
                 <div className="space-y-1.5 leading-relaxed pt-1">

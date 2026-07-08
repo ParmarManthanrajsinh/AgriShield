@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import dynamic from "next/dynamic";
-import { API_BASE , authFetch} from "@/lib/api";
+import { getApiBase , authFetch} from "@/lib/api";
 
 // Next.js needs dynamic import for react-leaflet
 const FarmMap = dynamic(() => import("@/components/FarmMap"), { ssr: false });
@@ -35,7 +35,8 @@ export default function NewFarmPage() {
         lng: points[0][1].toString()
       };
 
-      const res = await authFetch(`${API_BASE}/farms`, {
+      const apiBase = await getApiBase();
+      const res = await authFetch(`${apiBase}/farms`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)

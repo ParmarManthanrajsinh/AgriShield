@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { API_BASE, getErrorMessage , authFetch} from "@/lib/api";
+import { getApiBase, getErrorMessage , authFetch} from "@/lib/api";
 import {
   ArrowLeft,
   Sprout,
@@ -165,21 +165,24 @@ export default function RecommendedCropsPage() {
   }, []);
 
   useEffect(() => {
-    authFetch(`${API_BASE}/farms`, {
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/farms`, {
       })
-      .then((data) => {
-        setFarms(data);
-        if (data.length > 0) {
-          setSelectedFarmId(data[0].id);
-          setLat(data[0].lat || "");
-          setLng(data[0].lng || "");
-        }
-      })
-      .catch(() => router.push("/login"));
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((data) => {
+          setFarms(data);
+          if (data.length > 0) {
+            setSelectedFarmId(data[0].id);
+            setLat(data[0].lat || "");
+            setLng(data[0].lng || "");
+          }
+        })
+        .catch(() => router.push("/login"));
+    })();
   }, [router]);
 
   const handleFarmSelect = (farmId: number) => {
@@ -223,7 +226,8 @@ export default function RecommendedCropsPage() {
       if (month.trim()) body.month = parseInt(month);
       if (groundwaterDepth.trim()) body.groundwater_depth_m = parseFloat(groundwaterDepth);
 
-      const res = await authFetch(`${API_BASE}/api/recommend-crop`, {
+      const apiBase = await getApiBase();
+      const res = await authFetch(`${apiBase}/api/recommend-crop`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),

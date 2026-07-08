@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE, getErrorMessage } from "@/lib/api";
+import { getApiBase, getErrorMessage } from "@/lib/api";
 import { ArrowLeft, User, Mail, Lock, UserPlus, Leaf } from "lucide-react";
 
 export default function RegisterPage() {
@@ -36,7 +36,8 @@ export default function RegisterPage() {
       return;
     }
     try {
-      const res = await fetch(`${API_BASE}/auth/register`, {
+      const apiBase = await getApiBase();
+      const res = await fetch(`${apiBase}/auth/register`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password })

@@ -4,7 +4,7 @@ import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE, getErrorMessage, setToken, authFetch } from "@/lib/api";
+import { getApiBase, getErrorMessage, setToken, authFetch } from "@/lib/api";
 import { ArrowLeft, Mail, Lock, LogIn, Leaf } from "lucide-react";
 
 function LoginPageContent() {
@@ -37,11 +37,12 @@ function LoginPageContent() {
     setError("");
     setLoading(true);
     try {
+      const apiBase = await getApiBase();
       const formData = new URLSearchParams();
       formData.append("username", email);
       formData.append("password", password);
 
-      const res = await fetch(`${API_BASE}/auth/login`, {
+      const res = await fetch(`${apiBase}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: formData.toString()
@@ -58,7 +59,7 @@ function LoginPageContent() {
       }
       setToken(loginData.access_token);
 
-      const meRes = await authFetch(`${API_BASE}/users/me`);
+      const meRes = await authFetch(`${apiBase}/users/me`);
       if (!meRes.ok) {
         throw new Error("Session verification failed after login");
       }

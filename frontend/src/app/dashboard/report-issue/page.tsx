@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { API_BASE, getErrorMessage , authFetch} from "@/lib/api";
+import { getApiBase, getErrorMessage , authFetch} from "@/lib/api";
 
 interface Farm {
   id: number;
@@ -278,17 +278,20 @@ export default function ReportIssuePage() {
 
 
   useEffect(() => {
-    authFetch(`${API_BASE}/farms`, {
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/farms`, {
       })
-      .then((data) => {
-        setFarms(data);
-        if (data.length > 0) setSelectedFarmId(data[0].id);
-      })
-      .catch(() => router.push("/login"));
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((data) => {
+          setFarms(data);
+          if (data.length > 0) setSelectedFarmId(data[0].id);
+        })
+        .catch(() => router.push("/login"));
+    })();
   }, [router]);
 
   const handlePhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -355,7 +358,8 @@ export default function ReportIssuePage() {
     if (audioBlob) formData.append("audio", audioBlob, "recording.webm");
 
     try {
-      const res = await authFetch(`${API_BASE}/api/health-report`, {
+      const apiBase = await getApiBase();
+      const res = await authFetch(`${apiBase}/api/health-report`, {
         method: "POST",
         body: formData,
       });

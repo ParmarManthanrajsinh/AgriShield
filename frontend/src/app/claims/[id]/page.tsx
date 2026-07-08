@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { API_BASE, getErrorMessage , authFetch} from "@/lib/api";
+import { getApiBase, getErrorMessage , authFetch} from "@/lib/api";
 
 export default function ClaimDetailPage() {
   const params = useParams();
@@ -12,13 +12,16 @@ export default function ClaimDetailPage() {
   const [claim, setClaim] = useState<any>(null);
 
   useEffect(() => {
-    authFetch(`${API_BASE}/claims/${params.id}`)
-    .then(res => {
-      if (!res.ok) throw new Error("Not found");
-      return res.json();
-    })
-    .then(data => setClaim(data))
-    .catch(() => router.push("/login"));
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/claims/${params.id}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+      })
+      .then(data => setClaim(data))
+      .catch(() => router.push("/login"));
+    })();
   }, [params.id, router]);
 
   const [generating, setGenerating] = useState(false);
@@ -26,8 +29,9 @@ export default function ClaimDetailPage() {
 
   const handleGenerateProof = async () => {
     setGenerating(true);
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/claims/${params.id}/generate-proof`, {
+      const res = await authFetch(`${apiBase}/claims/${params.id}/generate-proof`, {
         method: "POST"
       });
       if (res.ok) {
@@ -45,8 +49,9 @@ export default function ClaimDetailPage() {
 
   const handleLogBlockchain = async () => {
     setLogging(true);
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/claims/${params.id}/log-blockchain`, {
+      const res = await authFetch(`${apiBase}/claims/${params.id}/log-blockchain`, {
         method: "POST"
       });
       if (res.ok) {

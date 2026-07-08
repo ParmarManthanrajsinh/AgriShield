@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 import MetricsChart from "@/components/MetricsChart";
-import { API_BASE, getErrorMessage , authFetch} from "@/lib/api";
+import { getApiBase, getErrorMessage , authFetch} from "@/lib/api";
 
 const FarmMap = dynamic(() => import("@/components/FarmMap"), { ssr: false });
 
@@ -17,13 +17,18 @@ export default function FarmDetailPage() {
   const [metrics, setMetrics] = useState<any[]>([]);
   const [refreshing, setRefreshing] = useState(false);
 
-  const fetchMetrics = async () => {
+  const fetchMetricsWithBase = async (apiBase: string) => {
     try {
-      const res = await authFetch(`${API_BASE}/farms/${params.id}/metrics`);
+      const res = await authFetch(`${apiBase}/farms/${params.id}/metrics`);
       if (res.ok) setMetrics(await res.json());
     } catch (err) {
       console.error(err);
     }
+  };
+
+  const fetchMetrics = async () => {
+    const apiBase = await getApiBase();
+    return fetchMetricsWithBase(apiBase);
   };
 
   const [mintingNFT, setMintingNFT] = useState(false);
@@ -32,22 +37,30 @@ export default function FarmDetailPage() {
   const [editArea, setEditArea] = useState("");
   const [editPoints, setEditPoints] = useState<[number, number][]>([]);
   const [savingEdit, setSavingEdit] = useState(false);
+  const [resolvedBase, setResolvedBase] = useState("");
 
   useEffect(() => {
-    authFetch(`${API_BASE}/farms/${params.id}`)
-    .then(res => {
-      if (!res.ok) throw new Error("Not found");
-      return res.json();
-    })
-    .then(data => {
-      data.points = data.boundary_geojson ? JSON.parse(data.boundary_geojson) : [];
-      setFarm(data);
-      setEditName(data.name || "");
-      setEditArea(data.area_hectares || "");
-      setEditPoints(data.points || []);
-      fetchMetrics();
-    })
-    .catch(() => router.push("/login"));
+    getApiBase().then(setResolvedBase);
+  }, []);
+
+  useEffect(() => {
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/farms/${params.id}`)
+      .then(res => {
+        if (!res.ok) throw new Error("Not found");
+        return res.json();
+      })
+      .then(data => {
+        data.points = data.boundary_geojson ? JSON.parse(data.boundary_geojson) : [];
+        setFarm(data);
+        setEditName(data.name || "");
+        setEditArea(data.area_hectares || "");
+        setEditPoints(data.points || []);
+        fetchMetricsWithBase(apiBase);
+      })
+      .catch(() => router.push("/login"));
+    })();
   }, [params.id, router]);
 
   const handleSaveEdit = async () => {
@@ -56,6 +69,7 @@ export default function FarmDetailPage() {
       return;
     }
     setSavingEdit(true);
+    const apiBase = await getApiBase();
     try {
       const payload = {
         name: editName,
@@ -64,7 +78,7 @@ export default function FarmDetailPage() {
         lat: editPoints[0][0].toString(),
         lng: editPoints[0][1].toString()
       };
-      const res = await authFetch(`${API_BASE}/farms/${params.id}`, {
+      const res = await authFetch(`${apiBase}/farms/${params.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
@@ -87,8 +101,9 @@ export default function FarmDetailPage() {
     if (!window.confirm("⚠️ Are you sure you want to permanently delete this farm and all associated records?")) {
       return;
     }
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/farms/${params.id}`, {
+      const res = await authFetch(`${apiBase}/farms/${params.id}`, {
         method: "DELETE"
       });
       if (res.ok) {
@@ -103,8 +118,9 @@ export default function FarmDetailPage() {
 
   const handleRefresh = async () => {
     setRefreshing(true);
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/farms/${params.id}/refresh-metrics`, {
+      const res = await authFetch(`${apiBase}/farms/${params.id}/refresh-metrics`, {
         method: "POST"
       });
       if (res.ok) await fetchMetrics();
@@ -115,8 +131,9 @@ export default function FarmDetailPage() {
   };
 
   const handleSubmitClaim = async () => {
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/claims`, {
+      const res = await authFetch(`${apiBase}/claims`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ farm_id: params.id })
@@ -135,8 +152,9 @@ export default function FarmDetailPage() {
 
   const handleMintNFT = async () => {
     setMintingNFT(true);
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/farms/${params.id}/mint-nft`, {
+      const res = await authFetch(`${apiBase}/farms/${params.id}/mint-nft`, {
         method: "POST"
       });
       if (res.ok) {
@@ -319,7 +337,7 @@ export default function FarmDetailPage() {
                 <CardTitle>Dynamic NFT Badge</CardTitle>
               </CardHeader>
               <CardContent className="p-8 flex justify-center">
-                <img src={`${API_BASE}${farm.nft_url}`} alt="Dynamic Farm NFT" className="w-64 h-64 rounded-xl shadow-lg border-4 border-white transform transition duration-500 hover:scale-105" />
+                <img src={`${resolvedBase}${farm.nft_url}`} alt="Dynamic Farm NFT" className="w-64 h-64 rounded-xl shadow-lg border-4 border-white transform transition duration-500 hover:scale-105" />
               </CardContent>
             </Card>
           )}

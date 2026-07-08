@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import Link from "next/link";
-import { API_BASE , authFetch, removeToken} from "@/lib/api";
+import { getApiBase , authFetch, removeToken} from "@/lib/api";
 
 interface Claim {
   id: number;
@@ -22,26 +22,30 @@ export default function AdminDashboardPage() {
   const [claims, setClaims] = useState<Claim[]>([]);
 
   useEffect(() => {
-    authFetch(`${API_BASE}/users/me`)
-      .then(res => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
-      })
-      .then(userData => {
-        if (userData.role !== "insurance_admin") {
-          router.push("/dashboard");
-          return;
-        }
-        setUser(userData);
-        return authFetch(`${API_BASE}/admin/claims`)
-          .then(res => { if (!res.ok) throw new Error("Unauthorized"); return res.json(); })
-          .then(data => setClaims(data));
-      })
-      .catch(() => router.push("/dashboard"));
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/users/me`)
+        .then(res => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then(userData => {
+          if (userData.role !== "insurance_admin") {
+            router.push("/dashboard");
+            return;
+          }
+          setUser(userData);
+          return authFetch(`${apiBase}/admin/claims`)
+            .then(res => { if (!res.ok) throw new Error("Unauthorized"); return res.json(); })
+            .then(data => setClaims(data));
+        })
+        .catch(() => router.push("/dashboard"));
+    })();
   }, [router]);
 
   const handleLogout = async () => {
-    await authFetch(`${API_BASE}/auth/logout`, { method: "POST" });
+    const apiBase = await getApiBase();
+    await authFetch(`${apiBase}/auth/logout`, { method: "POST" });
     router.push("/login");
   };
 

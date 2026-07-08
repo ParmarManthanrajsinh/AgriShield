@@ -11,7 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { API_BASE, getErrorMessage , authFetch} from "@/lib/api";
+import { getApiBase, getErrorMessage , authFetch} from "@/lib/api";
 
 interface Farm {
   id: number;
@@ -122,30 +122,33 @@ export default function AdvisoryPage() {
   const [broadcastSuccess, setBroadcastSuccess] = useState("");
 
   useEffect(() => {
-    authFetch(`${API_BASE}/farms`, {
-    })
-      .then((res) => {
-        if (!res.ok) throw new Error("Unauthorized");
-        return res.json();
+    (async () => {
+      const apiBase = await getApiBase();
+      authFetch(`${apiBase}/farms`, {
       })
-      .then((farms) => {
-        setFarms(farms);
-        if (farms.length > 0) {
-          setSelectedFarmId(farms[0].id);
-          fetchAdvisory(farms[0].id);
-        }
-      })
-      .catch(() => router.push("/login"));
+        .then((res) => {
+          if (!res.ok) throw new Error("Unauthorized");
+          return res.json();
+        })
+        .then((farms) => {
+          setFarms(farms);
+          if (farms.length > 0) {
+            setSelectedFarmId(farms[0].id);
+            fetchAdvisoryWithBase(apiBase, farms[0].id);
+          }
+        })
+        .catch(() => router.push("/login"));
+    })();
   }, [router]);
 
-  const fetchAdvisory = async (farmId: number) => {
+  const fetchAdvisoryWithBase = async (apiBase: string, farmId: number) => {
     setLoading(true);
     setError("");
     setData(null);
     setBroadcastSuccess("");
 
     try {
-      const res = await authFetch(`${API_BASE}/api/advisory/${farmId}`,
+      const res = await authFetch(`${apiBase}/api/advisory/${farmId}`,
         { }
       );
       if (!res.ok) {
@@ -161,16 +164,18 @@ export default function AdvisoryPage() {
     }
   };
 
-  const handleFarmSelect = (farmId: number) => {
+  const handleFarmSelect = async (farmId: number) => {
     setSelectedFarmId(farmId);
-    fetchAdvisory(farmId);
+    const apiBase = await getApiBase();
+    fetchAdvisoryWithBase(apiBase, farmId);
   };
 
   const handleTestBroadcast = async () => {
     setBroadcasting(true);
     setBroadcastSuccess("");
+    const apiBase = await getApiBase();
     try {
-      const res = await authFetch(`${API_BASE}/webhooks/sms-inbound`, {
+      const res = await authFetch(`${apiBase}/webhooks/sms-inbound`, {
         method: "POST",
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
         body: new URLSearchParams({
@@ -291,7 +296,7 @@ export default function AdvisoryPage() {
         {selectedFarmId && !data && !loading && (
           <div className="text-center py-8">
             <Button
-              onClick={() => fetchAdvisory(selectedFarmId)}
+              onClick={async () => { const apiBase = await getApiBase(); fetchAdvisoryWithBase(apiBase, selectedFarmId); }}
               className="rounded-full px-8 py-3 bg-gradient-to-r from-amber-600 to-orange-500 hover:from-amber-700 hover:to-orange-600 text-white shadow-lg"
             >
               📡 Fetch Advisory
