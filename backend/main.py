@@ -444,7 +444,9 @@ def refresh_metrics(id: int, db: Session = Depends(get_db), current_user: models
     if prev_metric:
         ndvi_change = ndvi - float(prev_metric.ndvi_avg)
     
-    weather = services.fetch_weather(float(db_farm.lat), float(db_farm.lng))
+    lat = float(db_farm.lat) if db_farm.lat else 20.5937
+    lng = float(db_farm.lng) if db_farm.lng else 78.9629
+    weather = services.fetch_weather(lat, lng)
     disease_severity = get_latest_farm_severity(id)
     risk_level, risk_prob = services.compute_risk(ndvi, ndvi_change, weather['rainfall_mm'], weather['temp_c'], weather['humidity'], disease_severity)
     
