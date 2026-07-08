@@ -44,7 +44,7 @@ export default function FarmDetailPage() {
       return res.json();
     })
     .then(data => {
-      data.points = JSON.parse(data.boundary_geojson);
+      data.points = data.boundary_geojson ? JSON.parse(data.boundary_geojson) : [];
       setFarm(data);
       setEditName(data.name);
       setEditArea(data.area_hectares);
