@@ -134,8 +134,8 @@ export default function RecommendedCropsPage() {
         setFarms(data);
         if (data.length > 0) {
           setSelectedFarmId(data[0].id);
-          setLat(data[0].lat);
-          setLng(data[0].lng);
+          setLat(data[0].lat || "");
+          setLng(data[0].lng || "");
         }
       })
       .catch(() => router.push("/login"));
@@ -145,8 +145,8 @@ export default function RecommendedCropsPage() {
     setSelectedFarmId(farmId);
     const farm = farms.find((f) => f.id === farmId);
     if (farm) {
-      setLat(farm.lat);
-      setLng(farm.lng);
+      setLat(farm.lat || "");
+      setLng(farm.lng || "");
     }
   };
 
@@ -235,7 +235,7 @@ export default function RecommendedCropsPage() {
               <Button
                 type="button"
                 onClick={handleSatelliteSync}
-                disabled={syncingSatellite || !lat}
+                disabled={syncingSatellite}
                 className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white shadow-md rounded-full px-5 py-2 text-sm font-medium transition-all duration-300 flex items-center gap-2 self-start md:self-auto"
               >
                 {syncingSatellite ? (

@@ -124,7 +124,6 @@ export default function LandingPage() {
               href="/dashboard/whatsapp-ivr"
               className="w-full sm:w-auto text-base font-semibold bg-white border border-[#bbcabf] text-[#131b2e] px-8 py-4 rounded-xl shadow-sm hover:bg-[#eaedff] transition-all flex items-center justify-center gap-2"
             >
-              <span className="text-[#10b981] font-bold">💬</span>
               Open WhatsApp AI Sandbox (1800-AGRI-SHIELD)
             </Link>
           </div>
