@@ -13,12 +13,21 @@ export default function AdminClaimReviewPage() {
   const [verificationResult, setVerificationResult] = useState<boolean | null>(null);
 
   useEffect(() => {
-    fetch(`http://localhost:8000/claims/${params.id}`, {
-      credentials: "include"
-    })
-    .then(res => res.json())
-    .then(data => setClaim(data))
-    .catch(() => router.push("/admin"));
+    fetch("http://localhost:8000/users/me", { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(userData => {
+        if (userData.role !== "insurance_admin") {
+          router.push("/dashboard");
+          return;
+        }
+        return fetch(`http://localhost:8000/claims/${params.id}`, { credentials: "include" })
+          .then(res => { if (!res.ok) throw new Error("Error"); return res.json(); })
+          .then(data => setClaim(data));
+      })
+      .catch(() => router.push("/dashboard"));
   }, [params.id, router]);
 
   const handleVerify = async () => {

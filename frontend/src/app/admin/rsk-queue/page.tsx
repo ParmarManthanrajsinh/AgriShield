@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -53,6 +54,8 @@ function getStatusBadge(status: string) {
 }
 
 export default function RSKQueuePage() {
+  const router = useRouter();
+  const [user, setUser] = useState<{name: string, email: string, role?: string} | null>(null);
   const [tickets, setTickets] = useState<RSKTicket[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(false);
@@ -63,6 +66,15 @@ export default function RSKQueuePage() {
   const fetchTickets = async () => {
     setLoading(true);
     try {
+      const meRes = await fetch("http://localhost:8000/users/me", { credentials: "include" });
+      if (!meRes.ok) { router.push("/login"); return; }
+      const userData = await meRes.json();
+      if (userData.role !== "rsk_expert") {
+        router.push("/dashboard");
+        return;
+      }
+      setUser(userData);
+      if (userData.name) setExpertName(userData.name);
       const url = showAll
         ? "http://localhost:8000/api/rsk/all"
         : "http://localhost:8000/api/rsk/queue";
@@ -70,9 +82,12 @@ export default function RSKQueuePage() {
       if (res.ok) {
         const data = await res.json();
         setTickets(data);
+      } else {
+        router.push("/dashboard");
       }
     } catch {
       console.error("Failed to fetch tickets");
+      router.push("/dashboard");
     } finally {
       setLoading(false);
     }
@@ -106,16 +121,28 @@ export default function RSKQueuePage() {
     }
   };
 
+  const handleLogout = async () => {
+    await fetch("http://localhost:8000/auth/logout", { method: "POST", credentials: "include" });
+    router.push("/login");
+  };
+
   return (
     <div className="min-h-screen apple-bg p-6 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur border border-gray-100 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🏛️</span>
+            <div>
+              <p className="font-bold text-gray-900">RSK Expert Kendra Portal</p>
+              <p className="text-xs text-gray-500">Welcome, {user?.name || "Expert"}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+            Log out
+          </Button>
+        </div>
+
         <div>
-          <Link
-            href="/dashboard"
-            className="text-sm text-gray-500 hover:text-gray-700 transition-colors mb-2 inline-block"
-          >
-            ← Back to Dashboard
-          </Link>
           <h1 className="apple-title">🆘 RSK Expert Kendra Queue</h1>
           <p className="text-gray-500 mt-1">
             Review escalated crop health reports and dispatch closed-loop treatment plans

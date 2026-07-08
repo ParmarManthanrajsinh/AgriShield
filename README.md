@@ -100,3 +100,6 @@ This project is **100% Hackathon Ready**. We focused heavily on proving the core
 - **Blockchain Smart Contracts**: The "Log to Blockchain" feature currently simulates a transaction and generates a mock `tx_hash`. The Solidity contract exists but is not deployed to an active testnet to reduce friction during demo time.
 - **IPFS Storage**: The Dynamic NFT SVGs are stored locally rather than pinned to IPFS/Filecoin.
 - **Automated Payouts**: Real USDC/MATIC automated payouts via smart contracts upon successful ZKP verification are not yet implemented.
+
+
+<!-- python -m uvicorn main:app --reload --host localhost --port 8000 -->

@@ -54,3 +54,20 @@ def get_current_user(token: Optional[str] = Depends(oauth2_scheme), request: Req
     if user is None:
         raise credentials_exception
     return user
+
+def get_current_admin_user(current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "insurance_admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized. Insurance Admin access required."
+        )
+    return current_user
+
+def get_current_rsk_user(current_user: models.User = Depends(get_current_user)):
+    if current_user.role != "rsk_expert":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Not authorized. RSK Expert access required."
+        )
+    return current_user
+

@@ -13,9 +13,9 @@ requests
 slowapi
 
 # Optional / Production dependencies for real (non-mocked) services:
-# twilio
-# apscheduler
-# faster-whisper
-# gTTS
-# torch
-# torchvision
+twilio
+apscheduler
+faster-whisper
+gTTS
+torch
+torchvision

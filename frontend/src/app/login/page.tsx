@@ -34,6 +34,18 @@ export default function LoginPage() {
         throw new Error(data.detail || "Invalid credentials");
       }
 
+      const meRes = await fetch("http://localhost:8000/users/me", { credentials: "include" });
+      if (meRes.ok) {
+        const user = await meRes.json();
+        if (user.role === "rsk_expert") {
+          router.push("/admin/rsk-queue");
+          return;
+        }
+        if (user.role === "insurance_admin") {
+          router.push("/admin/claims");
+          return;
+        }
+      }
       router.push("/dashboard");
     } catch (err: any) {
       setError(err.message);

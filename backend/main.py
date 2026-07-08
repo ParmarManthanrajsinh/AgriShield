@@ -25,6 +25,27 @@ from routers.water_risk import router as water_risk_router
 
 models.Base.metadata.create_all(bind=engine)
 
+def seed_default_users():
+    db = next(get_db())
+    try:
+        seeds = [
+            ("rsk@agrishield.com", "RSK Expert Kendra", "rsk123", "rsk_expert"),
+            ("insurance@agrishield.com", "Insurance Admin", "insurance123", "insurance_admin"),
+        ]
+        for email, name, pwd, role in seeds:
+            user = db.query(models.User).filter(models.User.email == email).first()
+            if not user:
+                hashed = auth.get_password_hash(pwd)
+                db_user = models.User(email=email, name=name, password_hash=hashed, role=role)
+                db.add(db_user)
+            elif user.role != role:
+                user.role = role
+        db.commit()
+    finally:
+        db.close()
+
+seed_default_users()
+
 app = FastAPI(title="CropGuard MVP")
 app.include_router(water_risk_router)
 start_scheduler()
@@ -277,19 +298,19 @@ async def create_health_report(
 
 
 @app.get("/api/rsk/queue", tags=["RSK"])
-def rsk_queue(current_user: models.User = Depends(auth.get_current_user)):
+def rsk_queue(current_user: models.User = Depends(auth.get_current_rsk_user)):
     """Get all open RSK escalation tickets (admin/RSK expert view)."""
     return get_open_tickets()
 
 
 @app.get("/api/rsk/all", tags=["RSK"])
-def rsk_all(current_user: models.User = Depends(auth.get_current_user)):
+def rsk_all(current_user: models.User = Depends(auth.get_current_rsk_user)):
     """Get all RSK tickets including resolved."""
     return get_all_tickets()
 
 
 @app.post("/api/rsk/respond", tags=["RSK"])
-def rsk_respond(ticket_id: str = Form(...), response: str = Form(...), expert_name: str = Form("RSK Expert"), current_user: models.User = Depends(auth.get_current_user)):
+def rsk_respond(ticket_id: str = Form(...), response: str = Form(...), expert_name: str = Form("RSK Expert"), current_user: models.User = Depends(auth.get_current_rsk_user)):
     """RSK expert responds to an escalation ticket."""
     result = respond_to_ticket(ticket_id, response, expert_name)
     if not result:
@@ -522,11 +543,11 @@ def log_blockchain(id: int, db: Session = Depends(get_db), current_user: models.
     return db_claim
 
 @app.get("/admin/claims", response_model=list[schemas.ClaimResponse])
-def admin_get_claims(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def admin_get_claims(db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     return db.query(models.Claim).order_by(models.Claim.created_at.desc()).all()
 
 @app.post("/admin/claims/{id}/verify")
-def admin_verify_claim(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def admin_verify_claim(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     db_claim = db.query(models.Claim).filter(models.Claim.id == id).first()
     if not db_claim or not db_claim.proof_data:
         raise HTTPException(status_code=404, detail="Claim or proof not found")
@@ -535,7 +556,7 @@ def admin_verify_claim(id: int, db: Session = Depends(get_db), current_user: mod
     return {"is_valid": is_valid}
 
 @app.post("/admin/claims/{id}/approve", response_model=schemas.ClaimResponse)
-def admin_approve_claim(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def admin_approve_claim(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     db_claim = db.query(models.Claim).filter(models.Claim.id == id).first()
     if not db_claim:
         raise HTTPException(status_code=404, detail="Claim not found")
@@ -545,7 +566,7 @@ def admin_approve_claim(id: int, db: Session = Depends(get_db), current_user: mo
     return db_claim
 
 @app.post("/admin/claims/{id}/reject", response_model=schemas.ClaimResponse)
-def admin_reject_claim(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_user)):
+def admin_reject_claim(id: int, db: Session = Depends(get_db), current_user: models.User = Depends(auth.get_current_admin_user)):
     db_claim = db.query(models.Claim).filter(models.Claim.id == id).first()
     if not db_claim:
         raise HTTPException(status_code=404, detail="Claim not found")

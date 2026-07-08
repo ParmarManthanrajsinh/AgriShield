@@ -17,24 +17,49 @@ interface Claim {
 
 export default function AdminDashboardPage() {
   const router = useRouter();
+  const [user, setUser] = useState<{name: string, email: string, role?: string} | null>(null);
   const [claims, setClaims] = useState<Claim[]>([]);
 
   useEffect(() => {
-    fetch("http://localhost:8000/admin/claims", {
-      credentials: "include"
-    })
-    .then(res => {
-      if (!res.ok) throw new Error("Unauthorized");
-      return res.json();
-    })
-    .then(data => setClaims(data))
-    .catch(err => console.error(err));
+    fetch("http://localhost:8000/users/me", { credentials: "include" })
+      .then(res => {
+        if (!res.ok) throw new Error("Unauthorized");
+        return res.json();
+      })
+      .then(userData => {
+        if (userData.role !== "insurance_admin") {
+          router.push("/dashboard");
+          return;
+        }
+        setUser(userData);
+        return fetch("http://localhost:8000/admin/claims", { credentials: "include" })
+          .then(res => { if (!res.ok) throw new Error("Unauthorized"); return res.json(); })
+          .then(data => setClaims(data));
+      })
+      .catch(() => router.push("/dashboard"));
   }, [router]);
+
+  const handleLogout = async () => {
+    await fetch("http://localhost:8000/auth/logout", { method: "POST", credentials: "include" });
+    router.push("/login");
+  };
 
   return (
     <div className="min-h-screen apple-bg p-8">
       <div className="max-w-4xl mx-auto space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-        <Button variant="outline" className="rounded-full" onClick={() => router.push("/dashboard")}>&larr; User Dashboard</Button>
+        <div className="flex items-center justify-between bg-white/80 backdrop-blur border border-gray-100 rounded-2xl p-4 shadow-sm">
+          <div className="flex items-center gap-3">
+            <span className="text-2xl">🛡️</span>
+            <div>
+              <p className="font-bold text-gray-900">Insurance Admin Portal</p>
+              <p className="text-xs text-gray-500">Welcome, {user?.name || "Insurance Admin"}</p>
+            </div>
+          </div>
+          <Button variant="outline" size="sm" onClick={handleLogout} className="text-red-600 hover:text-red-700 hover:bg-red-50">
+            Log out
+          </Button>
+        </div>
+
         <div className="flex justify-between items-center py-4">
           <h1 className="apple-title">Admin Claims Dashboard</h1>
         </div>

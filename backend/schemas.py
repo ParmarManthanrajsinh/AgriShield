@@ -17,6 +17,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: int
+    role: str = "farmer"
     created_at: datetime
 
     class Config:

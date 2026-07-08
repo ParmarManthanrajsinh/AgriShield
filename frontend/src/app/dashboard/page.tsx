@@ -15,7 +15,7 @@ interface Farm {
 
 export default function DashboardPage() {
   const router = useRouter();
-  const [user, setUser] = useState<{name: string, email: string} | null>(null);
+  const [user, setUser] = useState<{name: string, email: string, role?: string} | null>(null);
   const [farms, setFarms] = useState<Farm[]>([]);
 
   useEffect(() => {
@@ -27,7 +27,19 @@ export default function DashboardPage() {
       if (!res.ok) throw new Error("Unauthorized");
       return res.json();
     })
-    .then(data => { if (!cancelled) setUser(data) })
+    .then(data => {
+      if (!cancelled) {
+        if (data.role === "rsk_expert") {
+          router.push("/admin/rsk-queue");
+          return;
+        }
+        if (data.role === "insurance_admin") {
+          router.push("/admin/claims");
+          return;
+        }
+        setUser(data);
+      }
+    })
     .catch(() => { if (!cancelled) router.push("/login") });
 
     fetch("http://localhost:8000/farms", {
@@ -56,7 +68,14 @@ export default function DashboardPage() {
         
         <Card className="apple-card">
           <CardHeader>
-            <CardTitle>Welcome, {user.name}</CardTitle>
+            <CardTitle className="flex items-center gap-3">
+              <span>Welcome, {user.name}</span>
+              {user.role && user.role !== "farmer" && (
+                <span className="text-xs px-3 py-1 bg-amber-100 text-amber-800 rounded-full border border-amber-200 font-semibold uppercase">
+                  {user.role.replace("_", " ")}
+                </span>
+              )}
+            </CardTitle>
             <CardDescription>Manage your registered farms, get AI crop advisories, and file ZKP insurance claims.</CardDescription>
           </CardHeader>
           <CardContent>
@@ -169,45 +188,6 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* 3. Admin & RSK Portal */}
-        <div className="space-y-3">
-          <h2 className="text-xl font-bold text-gray-900 flex items-center gap-2">🛡️ Admin & RSK Portal</h2>
-          <div className="grid gap-4 md:grid-cols-3">
-            <Card className="apple-card card-hover cursor-pointer border border-gray-100 group">
-              <Link href="/admin/rsk-queue" className="block h-full">
-                <CardContent className="p-5 flex items-center gap-3">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🆘</span>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">RSK Expert Queue</p>
-                    <p className="text-xs text-gray-500">Review escalated crop health tickets</p>
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
-            <Card className="apple-card card-hover cursor-pointer border border-gray-100 group">
-              <Link href="/admin/claims" className="block h-full">
-                <CardContent className="p-5 flex items-center gap-3">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">🛡️</span>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Admin Claims</p>
-                    <p className="text-xs text-gray-500">ZKP-verified claim verification</p>
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
-            <Card className="apple-card card-hover cursor-pointer border border-gray-100 group">
-              <Link href="/admin" className="block h-full">
-                <CardContent className="p-5 flex items-center gap-3">
-                  <span className="text-2xl group-hover:scale-110 transition-transform duration-300">📊</span>
-                  <div>
-                    <p className="font-semibold text-gray-900 text-sm">Admin Panel</p>
-                    <p className="text-xs text-gray-500">System overview & monitoring</p>
-                  </div>
-                </CardContent>
-              </Link>
-            </Card>
-          </div>
-        </div>
       </div>
     </div>
   );
