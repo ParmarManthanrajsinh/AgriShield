@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Login | AgriShield</title>
+<!-- Google Fonts -->
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:wght@400;700;800&amp;family=Plus+Jakarta+Sans:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<!-- Material Symbols -->
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "surface-container-low": "#f3f3f6",
+                        "primary-container": "#0f4d32",
+                        "surface-variant": "#e2e2e5",
+                        "secondary-container": "#73fcb4",
+                        "error": "#ba1a1a",
+                        "surface-container-highest": "#e2e2e5",
+                        "surface-container": "#eeeef0",
+                        "on-surface": "#1a1c1e",
+                        "on-primary-container": "#82bd9a",
+                        "outline": "#707972",
+                        "tertiary-container": "#414443",
+                        "tertiary-fixed": "#e1e3e1",
+                        "on-primary": "#ffffff",
+                        "surface-tint": "#30694c",
+                        "on-primary-fixed": "#002112",
+                        "on-error": "#ffffff",
+                        "inverse-on-surface": "#f0f0f3",
+                        "on-secondary-container": "#007347",
+                        "secondary-fixed-dim": "#54de99",
+                        "background": "#f9f9fc",
+                        "on-tertiary-container": "#aeb1af",
+                        "on-tertiary-fixed": "#191c1b",
+                        "on-tertiary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "inverse-primary": "#98d4b0",
+                        "tertiary-fixed-dim": "#c5c7c5",
+                        "on-background": "#1a1c1e",
+                        "primary-fixed": "#b3f0cb",
+                        "on-tertiary-fixed-variant": "#444746",
+                        "surface-container-high": "#e8e8ea",
+                        "on-primary-fixed-variant": "#145135",
+                        "on-surface-variant": "#404943",
+                        "secondary-fixed": "#73fcb4",
+                        "on-secondary-fixed-variant": "#005231",
+                        "surface": "#f9f9fc",
+                        "inverse-surface": "#2f3133",
+                        "surface-dim": "#dadadc",
+                        "outline-variant": "#c0c9c0",
+                        "secondary": "#006d43",
+                        "primary": "#00351f",
+                        "on-secondary-fixed": "#002111",
+                        "tertiary": "#2b2e2d",
+                        "primary-fixed-dim": "#98d4b0",
+                        "on-secondary": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "error-container": "#ffdad6",
+                        "surface-bright": "#f9f9fc"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "unit": "8px",
+                        "gutter": "24px",
+                        "margin-mobile": "16px",
+                        "container-max": "1280px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "headline-lg": ["Bricolage Grotesque"],
+                        "headline-lg-mobile": ["Bricolage Grotesque"],
+                        "display-lg": ["Bricolage Grotesque"],
+                        "body-lg": ["Plus Jakarta Sans"],
+                        "label-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["Plus Jakarta Sans"]
+                    },
+                    "fontSize": {
+                        "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "headline-lg-mobile": ["28px", {"lineHeight": "1.2", "fontWeight": "700"}],
+                        "display-lg": ["56px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "800"}],
+                        "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                        "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-md": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        
+        .organic-blob {
+            position: absolute;
+            z-index: 0;
+            filter: blur(60px);
+            opacity: 0.15;
+            pointer-events: none;
+        }
+
+        .sketch-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.12;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-position: center;
+        }
+
+        .login-card {
+            box-shadow: 0 40px 80px -20px rgba(15, 77, 50, 0.08);
+            border: 1px solid rgba(192, 201, 192, 0.4);
+            backdrop-filter: blur(8px);
+        }
+
+        input:focus {
+            outline: none !important;
+            box-shadow: 0 0 0 2px #54de99 !important;
+        }
+    </style>
+</head>
+<body class="bg-background min-h-screen flex flex-col font-body-md text-on-surface overflow-x-hidden">
+<!-- Background Illustration -->
+<div class="sketch-overlay" style="background-image: url('https://lh3.googleusercontent.com/aida/AP1WRLtMKBO_gY6vi40zhvrCUDE7LpxNpJI4jAp-S17okoKUgetlWZgVYuF0P9uqdbE5_oGuAMr2TN2MjOnUMUrCoEXk9x5c_RRnNCO06T13jaK9-mb4RTQ2SZ4Lsxvqq7vhy-ofIwWf8yAvslrTZc2o8sdUxn5kRlMV_9XeomjO2Rs2m9M8l9ZrCv-r2uTFr4myZEXpDi636KKTLuUFCWf2fA3zH3JkZ3afAUty9Vo0ng8Im_H5L-pxu9fLmxI')"></div>
+<!-- Organic Background Elements -->
+<div class="organic-blob bg-secondary w-[600px] h-[600px] rounded-full -top-48 -left-24"></div>
+<div class="organic-blob bg-primary w-[400px] h-[400px] rounded-full bottom-0 -right-12"></div>
+<!-- Top Bar (Simplified for Login) -->
+<header class="w-full px-margin-mobile md:px-margin-desktop py-8 flex justify-between items-center z-10">
+<div class="flex items-center gap-2 cursor-pointer group transition-all duration-300">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">shield</span>
+</div>
+<span class="font-headline-lg-mobile md:font-headline-lg font-bold text-primary group-hover:opacity-80 transition-opacity">AgriShield</span>
+</div>
+<a class="flex items-center gap-2 text-on-surface-variant hover:text-primary transition-colors duration-200 font-medium" href="#">
+<span class="material-symbols-outlined text-[20px]">arrow_back</span>
+<span class="hidden md:inline font-label-sm">Back to landing page</span>
+</a>
+</header>
+<!-- Main Content Area -->
+<main class="flex-grow flex items-center justify-center px-margin-mobile relative z-10 py-12">
+<div class="w-full max-w-[480px]">
+<!-- Login Card -->
+<div class="login-card bg-surface-container-lowest rounded-xl p-8 md:p-12 transition-all duration-500 ease-in-out">
+<div class="mb-10">
+<h1 class="font-headline-lg-mobile md:font-headline-lg text-primary mb-3">
+                        Welcome back to AgriShield
+                    </h1>
+<p class="text-on-surface-variant font-body-md opacity-80 leading-relaxed">
+                        Enter your credentials to access your farm dashboard and parametric claims.
+                    </p>
+</div>
+<form class="space-y-6" onsubmit="return false">
+<!-- Email Field -->
+<div class="space-y-2">
+<label class="block font-label-sm text-primary uppercase tracking-wider" for="email">Email Address</label>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">mail</span>
+<input class="w-full bg-surface-container-low border-outline-variant rounded-lg py-3.5 pl-12 pr-4 text-on-surface placeholder:text-outline-variant transition-all duration-200" id="email" name="email" placeholder="farmer@estate.com" type="email"/>
+</div>
+</div>
+<!-- Password Field -->
+<div class="space-y-2">
+<div class="flex justify-between items-center">
+<label class="block font-label-sm text-primary uppercase tracking-wider" for="password">Password</label>
+<a class="text-secondary font-label-sm hover:underline" href="#">Forgot password?</a>
+</div>
+<div class="relative">
+<span class="absolute left-4 top-1/2 -translate-y-1/2 material-symbols-outlined text-outline text-[20px]">lock</span>
+<input class="w-full bg-surface-container-low border-outline-variant rounded-lg py-3.5 pl-12 pr-4 text-on-surface placeholder:text-outline-variant transition-all duration-200" id="password" name="password" placeholder="••••••••" type="password"/>
+</div>
+</div>
+<!-- Remember Me -->
+<div class="flex items-center gap-3">
+<input class="w-5 h-5 rounded border-outline-variant text-secondary focus:ring-secondary cursor-pointer" id="remember" type="checkbox"/>
+<label class="text-on-surface-variant font-body-md cursor-pointer select-none" for="remember">Remember this device</label>
+</div>
+<!-- Log In Button -->
+<button class="w-full bg-primary-container text-on-primary py-4 rounded-lg font-headline-lg text-[18px] hover:bg-primary transition-all duration-300 shadow-lg hover:shadow-primary-container/20 flex items-center justify-center gap-2 group" type="submit">
+                        Log In
+                        <span class="material-symbols-outlined transition-transform duration-300 group-hover:translate-x-1">login</span>
+</button>
+</form>
+<!-- Register Footer -->
+<div class="mt-10 pt-8 border-t border-outline-variant/30 text-center">
+<p class="text-on-surface-variant font-body-md">
+                        Don't have an account? 
+                        <a class="text-secondary font-bold hover:underline ml-1" href="#">Register</a>
+</p>
+</div>
+</div>
+<!-- Hand-drawn leaf flourish (Micro-interaction anchor) -->
+<div class="mt-8 flex justify-center opacity-40">
+<span class="material-symbols-outlined text-primary-container text-4xl">eco</span>
+</div>
+</div>
+</main>
+<!-- Footer Information -->
+<footer class="w-full py-8 px-margin-mobile md:px-margin-desktop z-10">
+<div class="max-w-container-max mx-auto flex flex-col md:flex-row justify-between items-center gap-4 opacity-60">
+<p class="font-label-sm text-on-surface-variant">
+                © 2024 AgriShield. Technological Stewardship for the Modern Farmer.
+            </p>
+<nav class="flex gap-6">
+<a class="font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Privacy Policy</a>
+<a class="font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Terms of Service</a>
+<a class="font-label-sm text-on-surface-variant hover:text-primary transition-colors" href="#">Support</a>
+</nav>
+</div>
+</footer>
+<!-- Atmosphere Script -->
+<script>
+        document.addEventListener('mousemove', (e) => {
+            const blobs = document.querySelectorAll('.organic-blob');
+            const x = e.clientX / window.innerWidth;
+            const y = e.clientY / window.innerHeight;
+            
+            blobs.forEach((blob, index) => {
+                const speed = (index + 1) * 20;
+                blob.style.transform = `translate(${x * speed}px, ${y * speed}px)`;
+            });
+        });
+
+        // Add subtle focus animation to card
+        const inputs = document.querySelectorAll('input');
+        const card = document.querySelector('.login-card');
+        
+        inputs.forEach(input => {
+            input.addEventListener('focus', () => {
+                card.style.transform = 'translateY(-4px)';
+                card.style.borderColor = 'rgba(0, 109, 67, 0.2)';
+            });
+            input.addEventListener('blur', () => {
+                card.style.transform = 'translateY(0)';
+                card.style.borderColor = 'rgba(192, 201, 192, 0.4)';
+            });
+        });
+    </script>
+</body></html>
