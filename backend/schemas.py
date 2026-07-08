@@ -32,10 +32,10 @@ class TokenData(BaseModel):
 
 class FarmBase(BaseModel):
     name: str
-    lat: str
-    lng: str
-    boundary_geojson: str
-    area_hectares: str
+    lat: str | None = None
+    lng: str | None = None
+    boundary_geojson: str | None = None
+    area_hectares: str | float | None = None
 
 class FarmCreate(FarmBase):
     pass
