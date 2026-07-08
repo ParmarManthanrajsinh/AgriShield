@@ -1,27 +1,15 @@
+// On the client, use the same-origin proxy to avoid CORS / env-var issues in deployment.
+// On the server (SSR/build), resolve directly.
 function getDefaultApiBase(): string {
-  if (typeof window !== "undefined") return window.location.origin;
-  return "http://localhost:8000";
+  if (typeof window !== "undefined") return "/api/proxy";
+  return process.env.API_BACKEND_URL || "http://localhost:8000";
 }
-// API_BASE: inlined at build time from NEXT_PUBLIC_API_URL env var
+
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL || getDefaultApiBase();
 
-let _apiBasePromise: Promise<string> | null = null;
-
 export async function getApiBase(): Promise<string> {
-  if (_apiBasePromise) return _apiBasePromise;
-
-  _apiBasePromise = (async () => {
-    try {
-      const res = await fetch("/api/config");
-      const data = await res.json();
-      if (data.API_BASE) return data.API_BASE;
-    } catch {
-      // fall through to default
-    }
-    return getDefaultApiBase();
-  })();
-
-  return _apiBasePromise;
+  if (typeof window !== "undefined") return "/api/proxy";
+  return process.env.API_BACKEND_URL || "http://localhost:8000";
 }
 
 // --- Token helpers (localStorage-based, works cross-origin) ---
