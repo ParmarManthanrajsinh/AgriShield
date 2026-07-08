@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import Link from "next/link";
-import { Shield } from "lucide-react";
+import Image from "next/image";
 
 export default function LandingPage() {
   const [chatInput, setChatInput] = useState("");
@@ -38,10 +38,10 @@ export default function LandingPage() {
         <div className="flex justify-between items-center px-4 md:px-12 py-4 max-w-[1440px] mx-auto">
           {/* Logo & Brand */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="h-10 w-10 rounded-xl bg-gradient-to-tr from-[#006c49] to-[#10b981] flex items-center justify-center text-white shadow-md shadow-[#006c49]/20 group-hover:scale-105 transition-transform duration-300">
-              <Shield className="w-5 h-5" />
+            <div className="w-20 h-20 flex items-center justify-center group-hover:scale-105 transition-transform duration-300">
+              <Image src="/logo.png" alt="AgriShield Logo" width={80} height={80} className="object-contain" priority />
             </div>
-            <div className="flex flex-col">
+            <div className="hidden sm:flex flex-col">
               <span className="text-2xl font-bold font-heading text-[#006c49] tracking-tight">
                 AgriShield
               </span>
@@ -72,7 +72,7 @@ export default function LandingPage() {
         {/* Section 2: Hero Showcase */}
         <section className="flex flex-col items-center text-center max-w-4xl mx-auto space-y-8 mt-8">
 
-          <h1 className="text-4xl sm:text-6xl md:text-[72px] md:leading-[80px] font-bold font-heading text-[#131b2e] tracking-tight">
+          <h1 className="text-4xl sm:text-5xl md:text-[72px] md:leading-[80px] font-bold font-heading text-[#131b2e] tracking-tight">
             The Future of Farming.<br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#006c49] to-[#006398]">
               Protected by AI &amp; Zero-Knowledge Proofs.
@@ -113,7 +113,7 @@ export default function LandingPage() {
             {/* Card 1: ResNet18 & Groq AI Diagnostics */}
             <div
               id="vision"
-              className="bento-card md:col-span-8 p-8 flex flex-col justify-between relative bg-gradient-to-br from-white to-[#eaedff]/30"
+              className="bento-card md:col-span-8 p-6 md:p-8 flex flex-col justify-between relative bg-gradient-to-br from-white to-[#eaedff]/30"
             >
               <div className="z-10 max-w-md space-y-4">
                 <span className="text-xs font-bold text-[#006c49] uppercase tracking-wider font-mono">
@@ -140,7 +140,7 @@ export default function LandingPage() {
             {/* Card 2: ZKP Smart Contracts */}
             <div
               id="zkp"
-              className="bento-card md:col-span-4 p-8 flex flex-col justify-between bg-white"
+              className="bento-card md:col-span-4 p-6 md:p-8 flex flex-col justify-between bg-white"
             >
               <div className="space-y-4">
                 <span className="text-xs font-bold text-[#006398] uppercase tracking-wider font-mono">
@@ -170,7 +170,7 @@ export default function LandingPage() {
             {/* Card 3: Telemetry */}
             <div
               id="telemetry"
-              className="bento-card md:col-span-5 p-8 flex flex-col justify-between bg-white"
+              className="bento-card md:col-span-5 p-6 md:p-8 flex flex-col justify-between bg-white"
             >
               <div className="space-y-4">
                 <span className="text-xs font-bold text-[#f08921] uppercase tracking-wider font-mono">
@@ -194,7 +194,7 @@ export default function LandingPage() {
             {/* Card 4: WhatsApp AI Sandbox */}
             <div
               id="whatsapp"
-              className="bento-card md:col-span-7 p-8 flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-[#eaedff] to-[#f2f3ff]"
+              className="bento-card md:col-span-7 p-6 md:p-8 flex flex-col md:flex-row justify-between items-center bg-gradient-to-r from-[#eaedff] to-[#f2f3ff]"
             >
               <div className="max-w-sm space-y-4 mb-8 md:mb-0">
                 <span className="text-xs font-bold text-[#006c49] uppercase tracking-wider font-mono">
@@ -263,8 +263,8 @@ export default function LandingPage() {
               AgriShield
             </span>
           </div>
-          <nav className="flex flex-col md:flex-row gap-6 mt-4 md:mt-0 items-center text-center">
-            <span className="text-xs font-medium text-[#3c4a42] flex items-center gap-1.5">
+          <nav className="flex flex-wrap justify-center md:flex-nowrap gap-4 md:gap-6 mt-6 md:mt-0 items-center text-center">
+            <span className="text-xs font-medium text-[#3c4a42] flex items-center gap-1.5 w-full md:w-auto justify-center">
               <span className="w-2 h-2 rounded-full bg-[#10b981]" />
               System Status: Operational
             </span>
