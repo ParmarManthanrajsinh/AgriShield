@@ -12,6 +12,28 @@ import {
 } from "@/components/ui/card";
 import Link from "next/link";
 import { API_BASE } from "@/lib/api";
+import {
+  ArrowLeft,
+  MessageSquare,
+  Activity,
+  CheckCircle2,
+  AlertTriangle,
+  Send,
+  Smartphone,
+  Settings,
+  PhoneCall,
+  Globe,
+  Camera,
+  Bot,
+  ExternalLink,
+  Plus,
+  X,
+  RefreshCw,
+  FileImage,
+  Sparkles,
+  Zap,
+  Check,
+} from "lucide-react";
 
 interface ChatMessage {
   id: string;
@@ -31,19 +53,22 @@ interface ChatMessage {
 
 const SAMPLE_DISEASE_PHOTOS = [
   {
-    label: "🥀 Demo Sample Image 1 (Brown Spot-like)",
+    label: "Demo Sample Image 1 (Brown Spot-like)",
+    icon: <FileImage className="w-3.5 h-3.5 text-[#0f4d32]" />,
     url: "https://raw.githubusercontent.com/spMohanty/PlantVillage-Dataset/master/raw/color/Tomato___Early_blight/0012b9d2-2130-4a06-a834-b1f3af34f57e___RS_Erly.B%208389.JPG",
     query: "मेरी फसल के पत्तों पर धब्बे दिखाई दे रहे हैं, कृपया जांच करें",
     lang: "hi",
   },
   {
-    label: "🦠 Demo Sample Image 2 (Leaf Spot-like)",
+    label: "Demo Sample Image 2 (Leaf Spot-like)",
+    icon: <FileImage className="w-3.5 h-3.5 text-[#0f4d32]" />,
     url: "https://raw.githubusercontent.com/spMohanty/PlantVillage-Dataset/master/raw/color/Tomato___Septoria_leaf_spot/000146ff-92a4-4db6-90ad-8fce2ae4fded___JR_Sept.L.S%202799.JPG",
     query: "నా పంట ఆకులపై మచ్చలు కనిపిస్తున్నాయి",
     lang: "te",
   },
   {
-    label: "🌿 Demo Sample Image 3 (Healthy-like)",
+    label: "Demo Sample Image 3 (Healthy-like)",
+    icon: <CheckCircle2 className="w-3.5 h-3.5 text-[#0f4d32]" />,
     url: "https://raw.githubusercontent.com/spMohanty/PlantVillage-Dataset/master/raw/color/Tomato___healthy/000146ff-92a4-4db6-90ad-8fce2ae4fded___GH_HLAF_2799.JPG",
     query: "माझे पीक तपासा",
     lang: "mr",
@@ -51,18 +76,18 @@ const SAMPLE_DISEASE_PHOTOS = [
 ];
 
 const QUICK_QUESTIONS = [
-  { label: "🌧️ 7-Day Weather Alert", query: "अगले 7 दिनों का मौसम पूर्वानुमान क्या है?", lang: "hi" },
-  { label: "🌾 Best Kharif Crop", query: "నల్ల రేగడి నేలలో ఏ పంట వేయాలి?", lang: "te" },
-  { label: "🛡️ ZKP Claim Status", query: "माझा विमा क्लेम स्टेटस काय आहे?", lang: "mr" },
-  { label: "🆘 Help Menu", query: "help", lang: "en" },
+  { label: "7-Day Weather Alert", query: "अगले 7 दिनों का मौसम पूर्वानुमान क्या है?", lang: "hi" },
+  { label: "Best Kharif Crop", query: "నల్ల రేగడి నేలలో ఏ పంట వేయాలి?", lang: "te" },
+  { label: "ZKP Claim Status", query: "माझा विमा क्लेम स्टेटस काय आहे?", lang: "mr" },
+  { label: "Help Menu", query: "help", lang: "en" },
 ];
 
 const LANGUAGES = [
-  { code: "hi", name: "हिन्दी (Hindi)", cmd: "1", flag: "🇮🇳" },
-  { code: "te", name: "తెలుగు (Telugu)", cmd: "2", flag: "🇮🇳" },
-  { code: "mr", name: "मराठी (Marathi)", cmd: "3", flag: "🇮🇳" },
-  { code: "ta", name: "தமிழ் (Tamil)", cmd: "4", flag: "🇮🇳" },
-  { code: "en", name: "English", cmd: "5", flag: "🇬🇧" },
+  { code: "hi", name: "हिन्दी (Hindi)", cmd: "1" },
+  { code: "te", name: "తెలుగు (Telugu)", cmd: "2" },
+  { code: "mr", name: "मराठी (Marathi)", cmd: "3" },
+  { code: "ta", name: "தமிழ் (Tamil)", cmd: "4" },
+  { code: "en", name: "English", cmd: "5" },
 ];
 
 export default function WhatsAppIVRPage() {
@@ -76,6 +101,18 @@ export default function WhatsAppIVRPage() {
   const [simPhone, setSimPhone] = useState("+919876543210");
   const [isServerOnline, setIsServerOnline] = useState(true);
   const chatEndRef = useRef<HTMLDivElement>(null);
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -96,7 +133,7 @@ export default function WhatsAppIVRPage() {
       {
         id: "welcome_1",
         direction: "outbound",
-        body: "🌾 नमस्ते! मैं कृषि शील्ड AI (AgriShield AI) हूँ। आप मुझसे खेती से जुड़ा कोई भी सवाल पूछ सकते हैं, मौसम की जानकारी ले सकते हैं, या अपनी फसल की फोटो भेजकर रोग की पहचान (ResNet18 Vision AI) करवा सकते हैं!\n\n🌐 भाषा बदलने के लिए नीचे दिए गए भाषा बटन दबाएं।",
+        body: "नमस्ते! मैं कृषि शील्ड AI (AgriShield AI) हूँ। आप मुझसे खेती से जुड़ा कोई भी सवाल पूछ सकते हैं, मौसम की जानकारी ले सकते हैं, या अपनी फसल की फोटो भेजकर रोग की पहचान (ResNet18 Vision AI) करवा सकते हैं!\n\nभाषा बदलने के लिए नीचे दिए गए भाषा बटन दबाएं।",
         timestamp: new Date().toISOString(),
       },
     ]);
@@ -124,7 +161,7 @@ export default function WhatsAppIVRPage() {
     const userMsg: ChatMessage = {
       id: `in_${Date.now()}`,
       direction: "inbound",
-      body: text || "📸 [Photo Uploaded for AI Diagnosis]",
+      body: text || "[Photo Uploaded for AI Diagnosis]",
       media_url: mediaUrl || undefined,
       timestamp: new Date().toISOString(),
     };
@@ -146,7 +183,6 @@ export default function WhatsAppIVRPage() {
         setIsServerOnline(true);
         const data = await res.json();
         
-        // If language switched, update active state
         if (data.action_type === "language_switch" || langCode !== activeLang) {
           setActiveLang(data.language || langCode);
         }
@@ -173,7 +209,7 @@ export default function WhatsAppIVRPage() {
         {
           id: `err_${Date.now()}`,
           direction: "outbound",
-          body: "⚠️ Backend Server Offline or Unreachable. Please ensure FastAPI is running on port 8000: `python -m uvicorn main:app --port 8000`",
+          body: "Backend Server Offline or Unreachable. Please ensure FastAPI is running on port 8000: `python -m uvicorn main:app --port 8000`",
           timestamp: new Date().toISOString(),
         },
       ]);
@@ -188,37 +224,59 @@ export default function WhatsAppIVRPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 p-4 md:p-8 font-sans selection:bg-emerald-500 selection:text-white">
-      <div className="max-w-7xl mx-auto space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
+    <div className="bg-[#f9f9fc] min-h-screen flex flex-col font-sans text-[#1a1c1e] overflow-x-hidden relative p-6 md:p-8">
+      {/* Subtle Background Elements */}
+      <div 
+        className="fixed top-0 left-0 w-full h-full -z-10 opacity-[0.05] bg-contain bg-no-repeat bg-center pointer-events-none" 
+        style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida/AP1WRLtMKBO_gY6vi40zhvrCUDE7LpxNpJI4jAp-S17okoKUgetlWZgVYuF0P9uqdbE5_oGuAMr2TN2MjOnUMUrCoEXk9x5c_RRnNCO06T13jaK9-mb4RTQ2SZ4Lsxvqq7vhy-ofIwWf8yAvslrTZc2o8sdUxn5kRlMV_9XeomjO2Rs2m9M8l9ZrCv-r2uTFr4myZEXpDi636KKTLuUFCWf2fA3zH3JkZ3afAUty9Vo0ng8Im_H5L-pxu9fLmxI')" }}
+      ></div>
+
+      <div 
+        className="fixed z-0 blur-[100px] opacity-[0.08] pointer-events-none bg-[#006d43] w-[600px] h-[600px] rounded-full -top-48 -left-24 transition-transform duration-[10s]"
+        style={{ transform: `translate(${mousePos.x * 10}px, ${mousePos.y * 10}px)` }}
+      ></div>
+      <div 
+        className="fixed z-0 blur-[100px] opacity-[0.08] pointer-events-none bg-[#00351f] w-[400px] h-[400px] rounded-full bottom-0 -right-12 transition-transform duration-[10s]"
+        style={{ transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)` }}
+      ></div>
+
+      <div className="max-w-7xl mx-auto w-full space-y-6 z-10 relative animate-in fade-in slide-in-from-bottom-4 duration-500">
         
         {/* Top Header & Navigation */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-slate-900/80 border border-slate-800 p-6 rounded-3xl backdrop-blur-md shadow-2xl">
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white/90 backdrop-blur-sm border border-[rgba(192,201,192,0.4)] p-6 rounded-2xl shadow-sm">
           <div>
             <Link
               href="/dashboard"
-              className="text-xs font-bold uppercase tracking-wider text-emerald-400 hover:text-emerald-300 transition-colors inline-flex items-center gap-1 mb-2"
+              className="text-xs font-bold uppercase tracking-wider text-[#0f4d32] hover:text-[#00351f] transition-colors inline-flex items-center gap-1.5 mb-2"
             >
-              ← Back to Dashboard
+              <ArrowLeft className="w-4 h-4" /> Back to Dashboard
             </Link>
-            <h1 className="text-2xl md:text-3xl font-black tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-400 bg-clip-text text-transparent">
-              💬 WhatsApp AI & Indic Voice IVR Command Center
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">
-              24/7 Conversational Agricultural Scientist powered by <span className="text-emerald-400 font-bold">Twilio WhatsApp API</span>, <span className="text-teal-400 font-bold">Groq Llama-3.3-70B</span>, & <span className="text-cyan-400 font-bold">ResNet18 Vision</span>
-            </p>
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-[#e8f7f0] text-[#0f4d32] flex items-center justify-center shadow-sm shrink-0 border border-[#c0c9c0]/40">
+                <MessageSquare className="w-6 h-6" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold font-heading text-[#00351f]">
+                  WhatsApp AI & Indic Voice IVR Command Center
+                </h1>
+                <p className="text-[#404943] text-sm mt-1">
+                  24/7 Conversational Agricultural Scientist powered by <span className="text-[#0f4d32] font-bold">Twilio WhatsApp API</span>, <span className="text-[#0f4d32] font-bold">Groq Llama-3.3-70B</span>, & <span className="text-[#0f4d32] font-bold">ResNet18 Vision</span>
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Status Badges */}
           <div className="flex flex-wrap items-center gap-2">
-            <div className="px-3 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-bold flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <div className="px-3 py-1.5 rounded-lg bg-[#e8f7f0] border border-[#0f4d32]/30 text-[#0f4d32] text-xs font-bold flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#0f4d32] animate-pulse"></span>
               Twilio Webhook Online
             </div>
-            <div className="px-3 py-1.5 rounded-full bg-teal-500/10 border border-teal-500/30 text-teal-300 text-xs font-bold">
-              ⚡ Groq LLM Active
+            <div className="px-3 py-1.5 rounded-lg bg-[#f3f3f6] border border-[#c0c9c0]/60 text-[#00351f] text-xs font-bold flex items-center gap-1.5">
+              <Zap className="w-3.5 h-3.5 text-[#0f4d32]" /> Groq LLM Active
             </div>
-            <div className="px-3 py-1.5 rounded-full bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 text-xs font-bold">
-              🔬 ResNet18 Vision Ready
+            <div className="px-3 py-1.5 rounded-lg bg-[#f3f3f6] border border-[#c0c9c0]/60 text-[#00351f] text-xs font-bold flex items-center gap-1.5">
+              <Activity className="w-3.5 h-3.5 text-[#0f4d32]" /> ResNet18 Vision Ready
             </div>
           </div>
         </div>
@@ -228,22 +286,22 @@ export default function WhatsAppIVRPage() {
           
           {/* LEFT: Live Interactive WhatsApp Simulator & Sandbox */}
           <div className="lg:col-span-3 space-y-4">
-            <Card className="bg-slate-900/90 border border-slate-800 shadow-2xl rounded-3xl overflow-hidden flex flex-col h-[750px]">
+            <Card className="bg-white/90 backdrop-blur-sm border border-[rgba(192,201,192,0.4)] shadow-sm rounded-2xl overflow-hidden flex flex-col h-[750px]">
               
               {/* WhatsApp Header */}
-              <div className="bg-gradient-to-r from-emerald-700 via-teal-700 to-emerald-800 p-4 px-6 flex items-center justify-between shadow-md">
+              <div className="bg-[#0f4d32] p-4 px-6 flex items-center justify-between shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="w-11 h-11 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-2xl shadow-inner">
-                    🌾
+                  <div className="w-10 h-10 rounded-full bg-white/20 border border-white/30 flex items-center justify-center text-white shadow-inner shrink-0">
+                    <Bot className="w-5 h-5" />
                   </div>
                   <div>
-                    <h3 className="font-extrabold text-white text-base flex items-center gap-1.5">
+                    <h3 className="font-bold font-heading text-white text-base flex items-center gap-2">
                       AgriShield AI Scientist
-                      <span className="bg-emerald-400/30 text-emerald-100 text-[10px] px-2 py-0.5 rounded-full font-black">
+                      <span className="bg-white/20 text-white text-[10px] px-2 py-0.5 rounded font-bold tracking-wider">
                         OFFICIAL BOT
                       </span>
                     </h3>
-                    <p className="text-emerald-100 text-xs flex items-center gap-1.5 font-medium">
+                    <p className="text-emerald-100 text-xs flex items-center gap-1.5 font-medium mt-0.5">
                       <span className="w-1.5 h-1.5 rounded-full bg-emerald-300"></span>
                       +1 (659) 266-7445 · Twilio Verified Business
                     </p>
@@ -251,7 +309,7 @@ export default function WhatsAppIVRPage() {
                 </div>
 
                 {/* Farmer Phone Selector */}
-                <div className="flex items-center gap-2 bg-black/20 px-3 py-1.5 rounded-xl border border-white/10 text-xs">
+                <div className="flex items-center gap-2 bg-[#00351f]/60 px-3 py-1.5 rounded-lg border border-white/20 text-xs">
                   <span className="text-emerald-200 font-bold">Farmer:</span>
                   <input
                     type="text"
@@ -262,23 +320,22 @@ export default function WhatsAppIVRPage() {
                 </div>
               </div>
 
-              {/* Phase 3: Explicit Language Selector Bar */}
-              <div className="bg-slate-950/80 border-b border-slate-800/80 px-4 py-2 flex items-center justify-between overflow-x-auto gap-2">
-                <span className="text-[11px] font-black uppercase tracking-wider text-slate-400 whitespace-nowrap">
-                  🌐 Language (भाषा):
+              {/* Explicit Language Selector Bar */}
+              <div className="bg-[#f3f3f6] border-b border-[#c0c9c0]/50 px-4 py-2.5 flex items-center justify-between overflow-x-auto gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#00351f] whitespace-nowrap flex items-center gap-1.5">
+                  <Globe className="w-3.5 h-3.5 text-[#0f4d32]" /> Language (भाषा):
                 </span>
                 <div className="flex items-center gap-1.5">
                   {LANGUAGES.map((lang) => (
                     <button
                       key={lang.code}
                       onClick={() => handleLanguageSwitch(lang)}
-                      className={`px-2.5 py-1 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1 ${
+                      className={`px-3 py-1 rounded-lg text-xs font-bold transition-all duration-200 flex items-center gap-1.5 border ${
                         activeLang === lang.code
-                          ? "bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md scale-105 border border-emerald-400/50"
-                          : "bg-slate-800/80 hover:bg-slate-700 text-slate-300 border border-slate-700/50"
+                          ? "bg-[#0f4d32] text-white border-[#0f4d32] shadow-sm scale-105"
+                          : "bg-white hover:bg-[#e8f7f0] text-[#404943] hover:text-[#0f4d32] border-[#c0c9c0]/60"
                       }`}
                     >
-                      <span>{lang.flag}</span>
                       <span>{lang.name}</span>
                     </button>
                   ))}
@@ -286,12 +343,7 @@ export default function WhatsAppIVRPage() {
               </div>
 
               {/* Chat Message Window */}
-              <div
-                className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4"
-                style={{
-                  backgroundImage: "radial-gradient(circle at 50% 50%, rgba(16, 185, 129, 0.05) 0%, rgba(0, 0, 0, 0) 70%), linear-gradient(180deg, #090d16 0%, #060911 100%)",
-                }}
-              >
+              <div className="flex-1 overflow-y-auto p-4 md:p-6 space-y-4 bg-[#f9f9fc]/80">
                 {messages.map((msg) => (
                   <div
                     key={msg.id}
@@ -300,23 +352,23 @@ export default function WhatsAppIVRPage() {
                     }`}
                   >
                     <div
-                      className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 text-sm shadow-xl transition-all duration-300 ${
+                      className={`max-w-[85%] md:max-w-[75%] rounded-2xl p-4 text-sm shadow-sm transition-all duration-300 ${
                         msg.direction === "inbound"
-                          ? "bg-gradient-to-br from-emerald-600 to-teal-700 text-white rounded-br-xs border border-emerald-500/30"
-                          : "bg-slate-800/90 text-slate-100 rounded-bl-xs border border-slate-700/80 shadow-slate-950/50"
+                          ? "bg-[#0f4d32] text-white rounded-br-xs"
+                          : "bg-white text-[#1a1c1e] rounded-bl-xs border border-[rgba(192,201,192,0.6)]"
                       }`}
                     >
                       {/* If message has uploaded photo */}
                       {msg.media_url && (
-                        <div className="mb-3 rounded-xl overflow-hidden border border-white/20 bg-black/30">
+                        <div className="mb-3 rounded-xl overflow-hidden border border-[#c0c9c0]/40 bg-[#f3f3f6]">
                           <img
                             src={msg.media_url}
                             alt="Crop Upload"
                             className="w-full h-48 object-cover hover:scale-105 transition-transform duration-300"
                           />
-                          <div className="bg-black/60 px-3 py-1 text-[11px] text-emerald-300 font-mono flex items-center justify-between">
-                            <span>📸 Photo Uploaded</span>
-                            <span>ResNet18 Vision Analysis</span>
+                          <div className="bg-[#1a1c1e] px-3 py-1.5 text-xs text-white font-mono flex items-center justify-between">
+                            <span className="flex items-center gap-1.5"><Camera className="w-3.5 h-3.5 text-[#54de99]" /> Photo Uploaded</span>
+                            <span className="text-[#54de99] font-bold">ResNet18 Vision Analysis</span>
                           </div>
                         </div>
                       )}
@@ -328,24 +380,24 @@ export default function WhatsAppIVRPage() {
 
                       {/* If message is an AI Diagnosis Card */}
                       {msg.action_type === "photo_diagnosis" && msg.diagnosis && (
-                        <div className="mt-3 pt-3 border-t border-slate-700/80 bg-slate-900/80 rounded-xl p-3.5 space-y-2 border-l-4 border-l-cyan-400">
+                        <div className="mt-3 pt-3 border-t border-[#c0c9c0]/50 bg-[#f3f3f6] rounded-xl p-3.5 space-y-2 border-l-4 border-l-[#0f4d32]">
                           <div className="flex items-center justify-between">
-                            <span className="text-xs font-black text-cyan-400 uppercase tracking-wider">
-                              🔬 Vision Diagnosis Metadata
+                            <span className="text-xs font-bold text-[#00351f] uppercase tracking-wider flex items-center gap-1">
+                              <Activity className="w-3.5 h-3.5 text-[#0f4d32]" /> Vision Diagnosis Metadata
                             </span>
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-black uppercase ${
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
                               msg.diagnosis.severity === "high"
-                                ? "bg-red-500/20 text-red-400 border border-red-500/30"
+                                ? "bg-[#fdf2f2] text-[#c93b2b] border border-[#c93b2b]/30"
                                 : msg.diagnosis.severity === "medium"
-                                ? "bg-amber-500/20 text-amber-300 border border-amber-500/30"
-                                : "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                                ? "bg-[#fdf7f0] text-[#d9822b] border border-[#d9822b]/30"
+                                : "bg-[#e8f7f0] text-[#0f4d32] border border-[#0f4d32]/30"
                             }`}>
                               Severity: {msg.diagnosis.severity}
                             </span>
                           </div>
-                          <div className="text-xs text-slate-300 space-y-1">
-                            <p><span className="text-slate-400">Disease:</span> <span className="font-bold text-white">{msg.diagnosis.disease_name}</span></p>
-                            <p><span className="text-slate-400">Model Confidence:</span> <span className="font-mono text-emerald-400 font-bold">{((msg.diagnosis.confidence || 0.9) * 100).toFixed(1)}%</span></p>
+                          <div className="text-xs text-[#404943] space-y-1">
+                            <p><span className="text-[#707972] font-semibold">Disease:</span> <span className="font-bold text-[#00351f]">{msg.diagnosis.disease_name}</span></p>
+                            <p><span className="text-[#707972] font-semibold">Model Confidence:</span> <span className="font-mono text-[#0f4d32] font-bold">{((msg.diagnosis.confidence || 0.9) * 100).toFixed(1)}%</span></p>
                           </div>
                         </div>
                       )}
@@ -353,7 +405,7 @@ export default function WhatsAppIVRPage() {
                       {/* Timestamp & Status */}
                       <div
                         className={`text-[10px] mt-2 flex items-center justify-end gap-1 ${
-                          msg.direction === "inbound" ? "text-emerald-200" : "text-slate-400"
+                          msg.direction === "inbound" ? "text-emerald-200" : "text-[#707972]"
                         }`}
                       >
                         <span>
@@ -363,9 +415,9 @@ export default function WhatsAppIVRPage() {
                           })}
                         </span>
                         {msg.direction === "inbound" ? (
-                          <span className="font-bold">✓✓</span>
+                          <span className="font-bold flex items-center gap-0.5"><Check className="w-3 h-3 text-emerald-300" /><Check className="w-3 h-3 -ml-2 text-emerald-300" /></span>
                         ) : (
-                          <span className="text-emerald-400">🤖 AI</span>
+                          <span className="font-bold text-[#0f4d32] flex items-center gap-1"><Bot className="w-3 h-3" /> AI</span>
                         )}
                       </div>
                     </div>
@@ -373,8 +425,8 @@ export default function WhatsAppIVRPage() {
                 ))}
                 {sending && (
                   <div className="flex justify-start">
-                    <div className="bg-slate-800/90 border border-slate-700/80 rounded-2xl px-4 py-3 text-sm text-slate-400 flex items-center gap-2 animate-pulse">
-                      <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <div className="bg-white border border-[rgba(192,201,192,0.6)] rounded-2xl px-4 py-3 text-sm text-[#404943] flex items-center gap-2 animate-pulse shadow-sm">
+                      <RefreshCw className="w-4 h-4 text-[#0f4d32] animate-spin" />
                       <span>AgriShield AI is analyzing & reasoning...</span>
                     </div>
                   </div>
@@ -383,36 +435,40 @@ export default function WhatsAppIVRPage() {
               </div>
 
               {/* Interactive Controls Footbar */}
-              <div className="bg-slate-950 border-t border-slate-800/80 p-4 space-y-3">
+              <div className="bg-white border-t border-[rgba(192,201,192,0.4)] p-4 space-y-3">
                 
                 {/* 1. Sample Photo Upload Testing Buttons */}
                 <div>
-                  <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                      📸 Test ResNet18 Photo Diagnosis (Click to simulate farmer photo upload):
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-bold text-[#00351f] uppercase tracking-wider flex items-center gap-1.5">
+                      <Camera className="w-4 h-4 text-[#0f4d32]" /> Test ResNet18 Photo Diagnosis (Click to simulate photo upload):
                     </span>
                     <button
                       onClick={() => setShowMediaInput(!showMediaInput)}
-                      className="text-[11px] text-emerald-400 hover:underline font-semibold"
+                      className="text-xs text-[#0f4d32] hover:underline font-bold flex items-center gap-1"
                     >
-                      {showMediaInput ? "✕ Close Custom URL" : "+ Custom Image URL"}
+                      {showMediaInput ? (
+                        <><X className="w-3.5 h-3.5" /> Close Custom URL</>
+                      ) : (
+                        <><Plus className="w-3.5 h-3.5" /> Custom Image URL</>
+                      )}
                     </button>
                   </div>
 
                   {showMediaInput && (
-                    <div className="flex gap-2 mb-2 bg-slate-900 p-2 rounded-xl border border-slate-800">
+                    <div className="flex gap-2 mb-2 bg-[#f3f3f6] p-2.5 rounded-xl border border-[#c0c9c0]/60">
                       <input
                         type="text"
                         value={customMediaUrl}
                         onChange={(e) => setCustomMediaUrl(e.target.value)}
                         placeholder="Paste any raw Image URL (JPG/PNG) to diagnose..."
-                        className="flex-1 bg-slate-950 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-500"
+                        className="flex-1 bg-white border border-[#c0c9c0] rounded-lg px-3 py-1.5 text-xs text-[#1a1c1e] focus:outline-none focus:ring-2 focus:ring-[#54de99]"
                       />
                       <Button
                         size="sm"
                         onClick={() => sendSimulationMessage("Please diagnose this custom leaf photo", customMediaUrl, activeLang)}
                         disabled={!customMediaUrl.trim() || sending}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold px-3"
+                        className="bg-[#0f4d32] hover:bg-[#00351f] text-white text-xs font-bold px-4 rounded-lg shadow-sm"
                       >
                         Upload & Diagnose
                       </Button>
@@ -425,8 +481,9 @@ export default function WhatsAppIVRPage() {
                         key={idx}
                         onClick={() => sendSimulationMessage(photo.query, photo.url, photo.lang)}
                         disabled={sending}
-                        className="px-3 py-1.5 bg-slate-900 hover:bg-emerald-950/60 text-slate-200 hover:text-emerald-300 border border-slate-800 hover:border-emerald-500/50 rounded-xl text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 shadow-sm hover:scale-[1.02]"
+                        className="px-3 py-1.5 bg-[#f3f3f6] hover:bg-[#e8f7f0] text-[#1a1c1e] hover:text-[#0f4d32] border border-[#c0c9c0]/60 hover:border-[#0f4d32] rounded-lg text-xs font-semibold transition-all duration-200 flex items-center gap-1.5 shadow-sm"
                       >
+                        {photo.icon}
                         <span>{photo.label}</span>
                       </button>
                     ))}
@@ -434,14 +491,14 @@ export default function WhatsAppIVRPage() {
                 </div>
 
                 {/* 2. Quick Question Buttons */}
-                <div className="flex flex-wrap items-center gap-1.5 pt-1 border-t border-slate-900">
-                  <span className="text-[11px] font-bold text-slate-500 uppercase mr-1">Quick Q&A:</span>
+                <div className="flex flex-wrap items-center gap-1.5 pt-2 border-t border-[rgba(192,201,192,0.3)]">
+                  <span className="text-xs font-bold text-[#707972] uppercase mr-1">Quick Q&A:</span>
                   {QUICK_QUESTIONS.map((q, idx) => (
                     <button
                       key={idx}
                       onClick={() => sendSimulationMessage(q.query, "", q.lang)}
                       disabled={sending}
-                      className="px-2.5 py-1 bg-slate-900/80 hover:bg-teal-950/50 text-teal-300/90 hover:text-teal-200 border border-slate-800 hover:border-teal-500/40 rounded-lg text-xs font-medium transition-all"
+                      className="px-3 py-1 bg-[#f3f3f6] hover:bg-[#e8f7f0] text-[#404943] hover:text-[#0f4d32] border border-[#c0c9c0]/60 hover:border-[#0f4d32] rounded-lg text-xs font-medium transition-all"
                     >
                       {q.label}
                     </button>
@@ -456,14 +513,15 @@ export default function WhatsAppIVRPage() {
                     onChange={(e) => setInputText(e.target.value)}
                     onKeyDown={(e) => e.key === "Enter" && sendSimulationMessage(inputText, "", activeLang)}
                     placeholder={`Ask any farming question in ${LANGUAGES.find(l => l.code === activeLang)?.name || "Hindi/English"}...`}
-                    className="flex-1 bg-slate-900 border border-slate-800 rounded-2xl px-4 py-3 text-sm text-white focus:outline-none focus:ring-2 focus:ring-emerald-500/50 focus:border-emerald-500 font-medium placeholder:text-slate-500"
+                    className="flex-1 bg-[#f3f3f6] border border-[#c0c9c0] rounded-lg px-4 py-3 text-sm text-[#1a1c1e] focus:outline-none focus:ring-2 focus:ring-[#54de99] font-medium placeholder:text-[#707972]"
                   />
                   <Button
                     onClick={() => sendSimulationMessage(inputText, "", activeLang)}
                     disabled={sending || (!inputText.trim() && !customMediaUrl.trim())}
-                    className="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold px-6 rounded-2xl shadow-lg shadow-emerald-900/30 transition-all duration-200 hover:scale-105"
+                    className="bg-[#0f4d32] hover:bg-[#00351f] text-white font-bold px-6 rounded-lg shadow-sm transition-all duration-200 flex items-center gap-1.5"
                   >
-                    {sending ? "..." : "Send"}
+                    <Send className="w-4 h-4" />
+                    <span>{sending ? "..." : "Send"}</span>
                   </Button>
                 </div>
 
@@ -474,29 +532,30 @@ export default function WhatsAppIVRPage() {
           {/* RIGHT: Twilio Setup Guide, Live Q&A Redirects, & Indic IVR (2 cols) */}
           <div className="lg:col-span-2 space-y-6">
             
-            {/* Phase 2: Live Farmer WhatsApp Redirect & Q&A Card */}
-            <Card className="bg-gradient-to-br from-emerald-900 via-teal-900 to-slate-900 border border-emerald-500/40 shadow-2xl rounded-3xl overflow-hidden text-white relative">
-              <div className="absolute -right-10 -bottom-10 w-40 h-40 bg-emerald-500/10 rounded-full blur-3xl pointer-events-none"></div>
-              <CardHeader className="pb-3">
+            {/* Live Farmer WhatsApp Redirect & Q&A Card */}
+            <Card className="bg-white/90 backdrop-blur-sm border border-[rgba(192,201,192,0.4)] shadow-sm rounded-2xl overflow-hidden text-[#1a1c1e]">
+              <CardHeader className="pb-3 border-b border-[rgba(192,201,192,0.3)] bg-[#f3f3f6]/50">
                 <div className="flex items-center justify-between">
-                  <span className="text-3xl">📱</span>
-                  <span className="bg-emerald-400 text-slate-950 font-black text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider">
-                    LIVE REDIRECT
+                  <div className="w-10 h-10 rounded-xl bg-[#e8f7f0] text-[#0f4d32] flex items-center justify-center shrink-0 border border-[#c0c9c0]/30">
+                    <Smartphone className="w-5 h-5" />
+                  </div>
+                  <span className="bg-[#e8f7f0] text-[#0f4d32] font-bold text-[10px] px-2.5 py-1 rounded-full uppercase tracking-wider border border-[#0f4d32]/30">
+                    Live Redirect
                   </span>
                 </div>
-                <CardTitle className="text-xl font-black mt-2">
+                <CardTitle className="text-xl font-bold font-heading text-[#00351f] mt-2">
                   Chat Live on Your Phone (Q&A)
                 </CardTitle>
-                <CardDescription className="text-emerald-200 text-xs">
+                <CardDescription className="text-[#404943] text-xs">
                   Farmers don't use websites! Click below to open real WhatsApp and start conversational Q&A instantly.
                 </CardDescription>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="bg-black/30 border border-white/10 rounded-2xl p-4 text-center space-y-3 backdrop-blur-sm">
-                  <div className="font-mono text-xs text-emerald-300 font-bold bg-emerald-950/60 py-2 rounded-xl border border-emerald-500/30">
+              <CardContent className="space-y-4 pt-4">
+                <div className="bg-[#f3f3f6] border border-[#c0c9c0]/50 rounded-xl p-4 text-center space-y-3">
+                  <div className="font-mono text-xs text-[#0f4d32] font-bold bg-[#e8f7f0] py-2 rounded-lg border border-[#0f4d32]/30">
                     wa.me/+14155238886
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed">
+                  <p className="text-xs text-[#404943] leading-relaxed">
                     Test photo disease diagnosis, weather alerts, or seed recommendations directly from your mobile device via Twilio's Universal WhatsApp Sandbox!
                   </p>
                   <div className="space-y-2 pt-1">
@@ -504,96 +563,102 @@ export default function WhatsAppIVRPage() {
                       href="https://wa.me/14155238886?text=join%20watch-ate"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-2.5 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-400 hover:to-orange-500 text-white font-black text-xs rounded-xl shadow-lg shadow-amber-900/40 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 block"
+                      className="w-full py-3 bg-[#0f4d32] hover:bg-[#00351f] text-white font-bold text-xs rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all block"
                     >
-                      <span>1️⃣ Step 1: Connect Phone (Send Join Code)</span>
-                      <span>↗</span>
+                      <span>Step 1: Connect Phone (Send Join Code)</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                     <a
                       href="https://wa.me/14155238886?text=Namaste!%20I%20want%20to%20ask%20a%20question%20about%20my%20crops"
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="w-full py-3 bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-400 hover:to-emerald-500 text-white font-black text-sm rounded-xl shadow-lg shadow-green-900/50 flex items-center justify-center gap-2 transition-all duration-200 hover:scale-105 block"
+                      className="w-full py-3 border border-[#0f4d32] text-[#0f4d32] hover:bg-[#0f4d32] hover:text-white font-bold text-xs rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all block"
                     >
-                      <span>2️⃣ Step 2: Start WhatsApp AI Chat & Q&A</span>
-                      <span>↗</span>
+                      <span>Step 2: Start WhatsApp AI Chat & Q&A</span>
+                      <ExternalLink className="w-3.5 h-3.5" />
                     </a>
                   </div>
                 </div>
-                <div className="bg-amber-500/10 border border-amber-500/30 rounded-xl p-3 text-[11px] text-amber-200 space-y-1">
-                  <p className="font-bold text-amber-300 flex items-center gap-1">⚠️ Why +1 (415) 523-8886?</p>
-                  <p>Your Twilio number (<code className="text-white font-mono">+16592667445</code>) is for SMS & Voice IVR. For WhatsApp, Twilio uses their Universal Sandbox (<code className="text-white font-mono">+14155238886</code>).</p>
-                  <p className="text-white font-semibold pt-1">👉 How to connect your phone for the first time:</p>
-                  <p>1. Open <span className="text-amber-300 font-bold">Twilio Console → Messaging → Try it out → Send a WhatsApp message</span>.</p>
-                  <p>2. Send your unique join code (e.g., <code className="text-white font-mono font-bold">join science-zebra</code>) to <code className="text-white font-mono">+1 415 523 8886</code> once!</p>
+                <div className="bg-[#fdf7f0] border border-[#d9822b]/30 rounded-xl p-3.5 text-xs text-[#8c5014] space-y-1.5">
+                  <p className="font-bold text-[#d9822b] flex items-center gap-1.5"><AlertTriangle className="w-4 h-4 shrink-0" /> Why +1 (415) 523-8886?</p>
+                  <p>Your Twilio number (<code className="text-[#1a1c1e] font-mono font-bold">+16592667445</code>) is for SMS & Voice IVR. For WhatsApp, Twilio uses their Universal Sandbox (<code className="text-[#1a1c1e] font-mono font-bold">+14155238886</code>).</p>
+                  <p className="text-[#00351f] font-bold pt-1">How to connect your phone for the first time:</p>
+                  <p>1. Open <span className="font-bold text-[#00351f]">Twilio Console → Messaging → Try it out → Send a WhatsApp message</span>.</p>
+                  <p>2. Send your unique join code (e.g., <code className="text-[#1a1c1e] font-mono font-bold">join science-zebra</code>) to <code className="text-[#1a1c1e] font-mono font-bold">+1 415 523 8886</code> once!</p>
                 </div>
-                <div className="text-[11px] text-slate-300 space-y-1 bg-slate-900/60 p-3 rounded-xl border border-white/5">
-                  <p className="font-bold text-emerald-300">💡 Quick Q&A Commands on Phone:</p>
-                  <p>• Send <span className="font-mono text-white font-bold">1</span> for Hindi, <span className="font-mono text-white font-bold">2</span> for Telugu</p>
-                  <p>• Send any <span className="text-white font-bold">leaf photo</span> for instant AI diagnosis</p>
-                  <p>• Send <span className="text-white font-bold">"weather"</span> or <span className="text-white font-bold">"crop"</span> for advisory</p>
+                <div className="text-xs text-[#404943] space-y-1.5 bg-[#f3f3f6] p-3.5 rounded-xl border border-[#c0c9c0]/40">
+                  <p className="font-bold text-[#00351f] flex items-center gap-1.5"><Zap className="w-3.5 h-3.5 text-[#0f4d32]" /> Quick Q&A Commands on Phone:</p>
+                  <p>• Send <span className="font-mono text-[#00351f] font-bold">1</span> for Hindi, <span className="font-mono text-[#00351f] font-bold">2</span> for Telugu</p>
+                  <p>• Send any <span className="text-[#00351f] font-bold">leaf photo</span> for instant AI diagnosis</p>
+                  <p>• Send <span className="text-[#00351f] font-bold">"weather"</span> or <span className="text-[#00351f] font-bold">"crop"</span> for advisory</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Twilio Webhook Configuration Guide */}
-            <Card className="bg-slate-900/90 border border-slate-800 shadow-xl rounded-3xl">
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <span className="text-2xl">⚙️</span>
+            <Card className="bg-white/90 backdrop-blur-sm border border-[rgba(192,201,192,0.4)] shadow-sm rounded-2xl">
+              <CardHeader className="pb-3 border-b border-[rgba(192,201,192,0.3)] bg-[#f3f3f6]/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-[#e8f7f0] text-[#0f4d32] flex items-center justify-center shrink-0 border border-[#c0c9c0]/30">
+                    <Settings className="w-5 h-5" />
+                  </div>
                   <div>
-                    <CardTitle className="text-base font-bold text-white">Twilio Webhook Setup Guide</CardTitle>
-                    <CardDescription className="text-slate-400 text-xs">How to connect live Twilio API to localhost</CardDescription>
+                    <CardTitle className="text-base font-bold font-heading text-[#00351f]">Twilio Webhook Setup Guide</CardTitle>
+                    <CardDescription className="text-[#707972] text-xs">How to connect live Twilio API to localhost</CardDescription>
                   </div>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3 text-xs text-slate-300">
-                <div className="space-y-2 bg-slate-950 p-3.5 rounded-2xl border border-slate-800 font-mono">
-                  <p className="text-slate-400 text-[11px] uppercase font-bold text-emerald-400">1. Webhook Endpoint URL:</p>
-                  <div className="bg-slate-900 p-2 rounded border border-slate-700 text-emerald-300 break-all select-all font-bold">
+              <CardContent className="space-y-3 text-xs text-[#404943] pt-4">
+                <div className="space-y-1.5 bg-[#f3f3f6] p-3.5 rounded-xl border border-[#c0c9c0]/50 font-mono">
+                  <p className="text-[#707972] text-[11px] uppercase font-bold tracking-wider">1. Webhook Endpoint URL:</p>
+                  <div className="bg-white p-2 rounded-lg border border-[#c0c9c0] text-[#0f4d32] break-all select-all font-bold">
                     {API_BASE}/webhooks/whatsapp-inbound
                   </div>
                 </div>
-                <div className="space-y-1.5 leading-relaxed">
-                  <p className="font-bold text-slate-200">How to expose localhost to Twilio:</p>
-                  <p className="text-slate-400">1. Run ngrok terminal: <code className="text-emerald-400 bg-slate-950 px-1.5 py-0.5 rounded">ngrok http 8000</code></p>
-                  <p className="text-slate-400">2. Copy your public ngrok HTTPS URL.</p>
-                  <p className="text-slate-400">3. In Twilio Console → WhatsApp Sandbox Settings → Paste under <span className="text-white font-semibold">"WHEN A MESSAGE COMES IN"</span>.</p>
+                <div className="space-y-1.5 leading-relaxed pt-1">
+                  <p className="font-bold text-[#00351f]">How to expose localhost to Twilio:</p>
+                  <p>1. Run ngrok terminal: <code className="text-[#0f4d32] bg-[#e8f7f0] px-1.5 py-0.5 rounded border border-[#0f4d32]/20 font-bold">ngrok http 8000</code></p>
+                  <p>2. Copy your public ngrok HTTPS URL.</p>
+                  <p>3. In Twilio Console → WhatsApp Sandbox Settings → Paste under <span className="text-[#00351f] font-bold">"WHEN A MESSAGE COMES IN"</span>.</p>
                 </div>
               </CardContent>
             </Card>
 
             {/* Indic Voice IVR Hotline Card */}
-            <Card className="bg-gradient-to-br from-indigo-950 via-purple-950 to-slate-900 border border-indigo-500/30 shadow-xl rounded-3xl text-white">
-              <CardHeader className="pb-3">
+            <Card className="bg-white/90 backdrop-blur-sm border border-[rgba(192,201,192,0.4)] shadow-sm rounded-2xl">
+              <CardHeader className="pb-3 border-b border-[rgba(192,201,192,0.3)] bg-[#f3f3f6]/50">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-2xl">📞</span>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-[#e8f7f0] text-[#0f4d32] flex items-center justify-center shrink-0 border border-[#c0c9c0]/30">
+                      <PhoneCall className="w-5 h-5" />
+                    </div>
                     <div>
-                      <CardTitle className="text-base font-bold">Indic Voice IVR Hotline</CardTitle>
-                      <CardDescription className="text-indigo-300 text-xs">Toll-Free · Bhashini AI TTS</CardDescription>
+                      <CardTitle className="text-base font-bold font-heading text-[#00351f]">Indic Voice IVR Hotline</CardTitle>
+                      <CardDescription className="text-[#707972] text-xs">Toll-Free · Bhashini AI TTS</CardDescription>
                     </div>
                   </div>
-                  <span className="bg-indigo-500/20 text-indigo-300 border border-indigo-500/40 text-[10px] px-2 py-0.5 rounded-full font-black">
-                    24/7 VOICE
+                  <span className="bg-[#e8f7f0] text-[#0f4d32] border border-[#0f4d32]/30 text-[10px] px-2.5 py-1 rounded-full font-bold uppercase tracking-wider">
+                    24/7 Voice
                   </span>
                 </div>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="bg-indigo-900/40 border border-indigo-500/20 rounded-2xl p-3.5 text-center">
-                  <p className="text-xl font-black tracking-wider text-indigo-200">
+              <CardContent className="space-y-3 pt-4">
+                <div className="bg-[#e8f7f0]/60 border border-[#0f4d32]/30 rounded-xl p-4 text-center">
+                  <p className="text-xl font-bold font-heading tracking-wider text-[#0f4d32]">
                     1800-AGRI-SHIELD
                   </p>
-                  <p className="text-[11px] text-indigo-300 mt-0.5">
+                  <p className="text-xs text-[#404943] font-medium mt-1">
                     +91-1800-274-7443 · Toll-Free Indic Voice Menu
                   </p>
                 </div>
-                <div className="space-y-1.5 text-xs text-indigo-200">
-                  <p className="font-bold text-white">IVR Keypress Flow:</p>
-                  <p>1️⃣ <span className="text-white font-medium">Press 1</span> → Crop Recommendations</p>
-                  <p>2️⃣ <span className="text-white font-medium">Press 2</span> → Weather & Dry-Spell Alerts</p>
-                  <p>3️⃣ <span className="text-white font-medium">Press 3</span> → Report Disease & Claim</p>
-                  <p>0️⃣ <span className="text-white font-medium">Press 0</span> → Connect to RSK Officer</p>
+                <div className="space-y-2 text-xs text-[#404943] pt-1">
+                  <p className="font-bold text-[#00351f]">IVR Keypress Flow:</p>
+                  <div className="space-y-1.5 pl-1">
+                    <p className="flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-[#f3f3f6] text-[#00351f] font-bold flex items-center justify-center border border-[#c0c9c0] text-[11px]">1</span> <span className="font-semibold text-[#00351f]">Press 1</span> → Crop Recommendations</p>
+                    <p className="flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-[#f3f3f6] text-[#00351f] font-bold flex items-center justify-center border border-[#c0c9c0] text-[11px]">2</span> <span className="font-semibold text-[#00351f]">Press 2</span> → Weather & Dry-Spell Alerts</p>
+                    <p className="flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-[#f3f3f6] text-[#00351f] font-bold flex items-center justify-center border border-[#c0c9c0] text-[11px]">3</span> <span className="font-semibold text-[#00351f]">Press 3</span> → Report Disease & Claim</p>
+                    <p className="flex items-center gap-2"><span className="w-5 h-5 rounded-md bg-[#f3f3f6] text-[#00351f] font-bold flex items-center justify-center border border-[#c0c9c0] text-[11px]">0</span> <span className="font-semibold text-[#00351f]">Press 0</span> → Connect to RSK Officer</p>
+                  </div>
                 </div>
               </CardContent>
             </Card>

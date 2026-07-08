@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getErrorMessage } from "@/lib/api";
 
 interface Farm {
   id: number;
@@ -364,13 +364,13 @@ export default function ReportIssuePage() {
 
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Failed to submit report");
+        throw new Error(getErrorMessage(err, "Failed to submit report"));
       }
 
       const data: ReportResponse = await res.json();
       setResult(data);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(getErrorMessage(err, "Something went wrong"));
     } finally {
       setLoading(false);
     }

@@ -4,7 +4,7 @@ import { useState, Suspense, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getErrorMessage } from "@/lib/api";
 import { ArrowLeft, Mail, Lock, LogIn, Leaf } from "lucide-react";
 
 function LoginPageContent() {
@@ -48,7 +48,7 @@ function LoginPageContent() {
 
       if (!res.ok) {
         const data = await res.json().catch(() => ({}));
-        throw new Error(data.detail || "Invalid credentials");
+        throw new Error(getErrorMessage(data, "Invalid credentials"));
       }
 
       const meRes = await fetch(`${API_BASE}/users/me`, { credentials: "include" });
@@ -65,7 +65,7 @@ function LoginPageContent() {
       }
       router.push(redirectPath);
     } catch (err: any) {
-      setError(err.message);
+      setError(getErrorMessage(err, "Login failed. Please verify your credentials."));
     }
   };
 

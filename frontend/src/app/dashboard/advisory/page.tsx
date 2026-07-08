@@ -11,7 +11,7 @@ import {
   CardDescription,
 } from "@/components/ui/card";
 import Link from "next/link";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getErrorMessage } from "@/lib/api";
 
 interface Farm {
   id: number;
@@ -152,12 +152,12 @@ export default function AdvisoryPage() {
       );
       if (!res.ok) {
         const err = await res.json();
-        throw new Error(err.detail || "Failed to fetch advisory");
+        throw new Error(getErrorMessage(err, "Failed to fetch advisory"));
       }
       const result: AdvisoryData = await res.json();
       setData(result);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(getErrorMessage(err, "Something went wrong"));
     } finally {
       setLoading(false);
     }

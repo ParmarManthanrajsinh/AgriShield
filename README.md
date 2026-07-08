@@ -53,7 +53,7 @@ python3.13 -m venv venv
 pip install --upgrade pip
 pip install -r requirements.txt
 cp .env.example .env  # Edit with your keys
-uvicorn main:app --reload --host localhost --port 80004
+uvicorn main:app --reload --host localhost --port 8000
 ```
 
 ### Frontend

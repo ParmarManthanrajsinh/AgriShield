@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getErrorMessage } from "@/lib/api";
 
 export default function ClaimDetailPage() {
   const params = useParams();
@@ -38,7 +38,7 @@ export default function ClaimDetailPage() {
         setClaim(updatedClaim);
       } else {
         const error = await res.json();
-        alert(error.detail || "Failed to generate proof");
+        alert(getErrorMessage(error, "Failed to generate proof"));
       }
     } catch (err) {
       console.error(err);
@@ -58,7 +58,7 @@ export default function ClaimDetailPage() {
         setClaim(updatedClaim);
       } else {
         const error = await res.json();
-        alert(error.detail || "Failed to log to blockchain");
+        alert(getErrorMessage(error, "Failed to log to blockchain"));
       }
     } catch (err) {
       console.error(err);

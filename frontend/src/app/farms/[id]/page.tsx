@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import dynamic from "next/dynamic";
 import MetricsChart from "@/components/MetricsChart";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getErrorMessage } from "@/lib/api";
 
 const FarmMap = dynamic(() => import("@/components/FarmMap"), { ssr: false });
 
@@ -134,7 +134,7 @@ export default function FarmDetailPage() {
         router.push(`/claims/${claim.id}`);
       } else {
         const error = await res.json();
-        alert(error.detail || "Failed to submit claim");
+        alert(getErrorMessage(error, "Failed to submit claim"));
       }
     } catch (err) {
       console.error(err);
@@ -153,7 +153,7 @@ export default function FarmDetailPage() {
         setFarm(updatedFarm);
       } else {
         const error = await res.json();
-        alert(error.detail || "Failed to mint NFT");
+        alert(getErrorMessage(error, "Failed to mint NFT"));
       }
     } catch (err) {
       console.error(err);

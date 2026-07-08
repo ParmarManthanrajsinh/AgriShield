@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { API_BASE } from "@/lib/api";
+import { API_BASE, getErrorMessage } from "@/lib/api";
 import { ArrowLeft, User, Mail, Lock, UserPlus, Leaf } from "lucide-react";
 
 export default function RegisterPage() {
@@ -31,6 +31,10 @@ export default function RegisterPage() {
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    if (password.length < 8) {
+      setError("Password must be at least 8 characters long.");
+      return;
+    }
     try {
       const res = await fetch(`${API_BASE}/auth/register`, {
         method: "POST",
@@ -39,13 +43,13 @@ export default function RegisterPage() {
       });
 
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.detail || "Registration failed");
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(getErrorMessage(errData, "Registration failed"));
       }
 
       router.push("/login");
     } catch (err: any) {
-      setError(err.message);
+      setError(getErrorMessage(err, "Registration failed. Please check your inputs."));
     }
   };
 
