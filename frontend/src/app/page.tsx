@@ -1,11 +1,24 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 
 export default function LandingPage() {
   const [chatInput, setChatInput] = useState("");
+  const [mousePos, setMousePos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      setMousePos({
+        x: e.clientX / window.innerWidth,
+        y: e.clientY / window.innerHeight,
+      });
+    };
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, []);
+
   const [messages, setMessages] = useState([
     { sender: "user", text: "My paddy field is showing brown spots." },
     {
@@ -32,7 +45,23 @@ export default function LandingPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#faf8ff] text-[#131b2e] font-sans antialiased overflow-x-hidden selection:bg-[#10b981] selection:text-white">
+    <div className="min-h-screen bg-[#faf8ff] text-[#131b2e] font-sans antialiased overflow-x-hidden selection:bg-[#10b981] selection:text-white relative">
+      {/* Background Illustration */}
+      <div 
+        className="fixed top-0 left-0 w-full h-full -z-10 opacity-[0.12] bg-contain bg-no-repeat bg-center pointer-events-none" 
+        style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida/AP1WRLtMKBO_gY6vi40zhvrCUDE7LpxNpJI4jAp-S17okoKUgetlWZgVYuF0P9uqdbE5_oGuAMr2TN2MjOnUMUrCoEXk9x5c_RRnNCO06T13jaK9-mb4RTQ2SZ4Lsxvqq7vhy-ofIwWf8yAvslrTZc2o8sdUxn5kRlMV_9XeomjO2Rs2m9M8l9ZrCv-r2uTFr4myZEXpDi636KKTLuUFCWf2fA3zH3JkZ3afAUty9Vo0ng8Im_H5L-pxu9fLmxI')" }}
+      ></div>
+
+      {/* Organic Background Elements */}
+      <div 
+        className="fixed z-0 blur-[80px] opacity-[0.15] pointer-events-none bg-[#006d43] w-[600px] h-[600px] rounded-full -top-48 -left-24 transition-transform duration-75"
+        style={{ transform: `translate(${mousePos.x * 20}px, ${mousePos.y * 20}px)` }}
+      ></div>
+      <div 
+        className="fixed z-0 blur-[80px] opacity-[0.15] pointer-events-none bg-[#00351f] w-[400px] h-[400px] rounded-full bottom-0 -right-12 transition-transform duration-75"
+        style={{ transform: `translate(${mousePos.x * 40}px, ${mousePos.y * 40}px)` }}
+      ></div>
+
       {/* Sticky Glass Navigation Bar */}
       <header className="fixed top-0 w-full z-50 bg-[#faf8ff]/75 backdrop-blur-lg border-b border-[#bbcabf]/30 shadow-sm transition-all duration-300">
         <div className="flex justify-between items-center px-4 md:px-12 py-4 max-w-[1440px] mx-auto">
