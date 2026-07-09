@@ -193,12 +193,16 @@ def _analyze_image_with_groq_vision(image_path: str, crop_type: str, language: s
             "max_tokens": 300
         }
         
-        res = requests.post(url, headers=headers, json=payload, timeout=15)
+        res = requests.post(url, headers=headers, json=payload, timeout=20)
         if res.status_code == 200:
             content = res.json()["choices"][0]["message"]["content"].strip()
-            # Remove any markdown formatting if present
-            if content.startswith("```json"):
-                content = content.replace("```json", "", 1).replace("```", "")
+            
+            # Robust JSON extraction
+            import re
+            json_match = re.search(r'\{.*\}', content, re.DOTALL)
+            if json_match:
+                content = json_match.group(0)
+                
             return json.loads(content)
         else:
             print(f"[Groq Vision API Error] {res.status_code}: {res.text}")
