@@ -151,7 +151,6 @@ function LoginPageContent() {
               <div className="space-y-2">
                 <div className="flex justify-between items-center">
                   <label className="block text-xs font-semibold tracking-wider uppercase text-[#00351f]" htmlFor="password">Password</label>
-                  <a className="text-[#006d43] text-xs font-semibold hover:underline" href="#">Forgot password?</a>
                 </div>
                 <div className="relative">
                   <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-[#707972]" size={20} />
